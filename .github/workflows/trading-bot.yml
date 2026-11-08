@@ -60,4 +60,4 @@ jobs:
           git add trading_bot/results/live_log_v8.txt
           git add trading_bot/data/external/fundamentals_cache.json 2>/dev/null || true
           git commit -m "Bot v9 run: $(date -u '+%Y-%m-%d %H:%M UTC')" || echo "Nada que commitear"
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:main || echo "Push fallido"
+          git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }} HEAD:main || echo "Push fallido" HEAD:main || echo "Push fallido"
