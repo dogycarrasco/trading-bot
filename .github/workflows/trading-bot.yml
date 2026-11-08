@@ -39,7 +39,7 @@ jobs:
           restore-keys: |
             bot-data-
 
-      - name: Ejecutar ciclo del bot
+      - name: Ejecutar rebalanceo del bot
         run: |
           cd trading_bot
           python -m bot.main --rebalance 2>&1 | tee ../live_run.log
@@ -52,16 +52,12 @@ jobs:
           path: live_run.log
           retention-days: 30
 
-      - name: Auto-commit del estado
-        if: always()
+      - name: Commit y push del estado
         run: |
           git config user.name "Trading Bot"
           git config user.email "bot@users.noreply.github.com"
-          git add trading_bot/results/live_state_v8.json trading_bot/results/live_log_v8.txt 2>/dev/null || true
+          git add trading_bot/results/live_state_v8.json
+          git add trading_bot/results/live_log_v8.txt
           git add trading_bot/data/external/fundamentals_cache.json 2>/dev/null || true
-          if git diff --staged --quiet; then
-            echo "Sin cambios en estado, skip commit"
-          else
-            git commit -m "Bot v9 run: $(date -u '+%Y-%m-%d %H:%M UTC')" || echo "Nada que commitear"
-            git push
-          fi
+          git commit -m "Bot v9 run: $(date -u '+%Y-%m-%d %H:%M UTC')" || echo "Nada que commitear"
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:main || echo "Push fallido"
