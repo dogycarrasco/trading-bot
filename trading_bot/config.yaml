@@ -1,0 +1,97 @@
+universe:
+  alpaca:
+    - symbol: SPY
+      broker: alpaca_proxy
+      weight: 0.40
+    - symbol: QQQ
+      broker: alpaca_proxy
+      weight: 0.20
+    - symbol: XLK
+      broker: alpaca_proxy
+      weight: 0.08
+    - symbol: XLF
+      broker: alpaca_proxy
+      weight: 0.05
+    - symbol: XLE
+      broker: alpaca_proxy
+      weight: 0.04
+    - symbol: XLV
+      broker: alpaca_proxy
+      weight: 0.04
+    - symbol: XLY
+      broker: alpaca_proxy
+      weight: 0.04
+    - symbol: XLP
+      broker: alpaca_proxy
+      weight: 0.03
+    - symbol: GLD
+      broker: alpaca_proxy
+      weight: 0.07
+
+backtest:
+  timeframe: 1d
+  history_years: 7
+  train_window_bars: 756
+  test_window_bars: 252
+  commission_pct:
+    alpaca: 0.0
+    alpaca_proxy: 0.0
+    ibkr: 0.0
+    ibkr_paper: 0.0
+    binance: 0.00075
+    binance_paper: 0.00075
+  slippage_pct: 0.0001
+  initial_capital: 500.0
+  cripto_leverage: 1.0
+
+risk:
+  base_risk_per_trade: 0.04
+  max_risk_per_trade: 0.08
+  min_risk_per_trade: 0.015
+  max_drawdown_pct: 0.18
+  recovery_threshold_pct: 0.06
+  max_positions: 5
+  stop_loss_atr_mult: 3.0
+  take_profit_atr_mult: 10.0
+  trailing_stop_enabled: true
+  trailing_stop_trigger_atr: 3.0
+  trailing_stop_distance_atr: 1.5
+  max_per_sector: 1
+
+regime:
+  adx_trend_threshold: 22.0
+  atr_vol_threshold: null
+  lookback_window: 50
+
+ml:
+  model: lightgbm
+  target_horizon: 5
+  target_threshold: null
+  features_lookback: 30
+  use_news_sentiment: false
+
+benchmark:
+  inflation_real_ecuador_annual: 0.17
+  inflation_official_ecuador_annual: 0.0191
+  inflation_us_annual: 0.03
+  sp500_avg_annual_return: 0.13
+  btc_avg_annual_return: 0.45
+  target_cagr_nominal: 0.30
+  target_cagr_real: 0.13
+
+brokers:
+  binance:
+    mode: paper
+    testnet: true
+    api_key_env: BINANCE_API_KEY
+    api_secret_env: BINANCE_API_SECRET
+  alpaca:
+    mode: paper
+    base_url: https://paper-api.alpaca.markets
+    api_key_env: ALPACA_API_KEY
+    secret_env: ALPACA_SECRET_KEY
+  ibkr:
+    mode: paper
+    host: 127.0.0.1
+    port: 7497
+    client_id: 1

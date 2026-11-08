@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trading Bot v9 - Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0d1117;
+      color: #c9d1d9;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 { color: #58a6ff; margin-bottom: 8px; }
+    .subtitle { color: #8b949e; margin-bottom: 24px; font-size: 14px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .card .label {
+      color: #8b949e;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    .card .value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #58a6ff;
+    }
+    .card .value.green { color: #3fb950; }
+    .card .value.red { color: #f85149; }
+    .card .value.orange { color: #d29922; }
+    .section {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .section h2 {
+      color: #58a6ff;
+      font-size: 16px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      text-align: left;
+      padding: 8px 12px;
+      border-bottom: 1px solid #30363d;
+    }
+    th { color: #8b949e; font-weight: 600; }
+    .pos { color: #3fb950; }
+    .neg { color: #f85149; }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge.green { background: rgba(63, 185, 80, 0.2); color: #3fb950; }
+    .badge.red { background: rgba(248, 81, 73, 0.2); color: #f85149; }
+    .badge.blue { background: rgba(88, 166, 255, 0.2); color: #58a6ff; }
+    #log {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      padding: 12px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 400px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .refresh-info {
+      text-align: center;
+      color: #8b949e;
+      font-size: 12px;
+      margin-top: 24px;
+    }
+    a { color: #58a6ff; }
+    .loading { color: #8b949e; font-style: italic; }
+  </style>
+</head>
+<body>
+  <h1>Trading Bot v9</h1>
+  <p class="subtitle">Dashboard paper trading — corre en GitHub Actions cada 6h</p>
+
+  <div class="grid" id="kpis">
+    <div class="card"><div class="label">Capital Total</div><div class="value" id="total-value">--</div></div>
+    <div class="card"><div class="label">Cash</div><div class="value orange" id="cash">--</div></div>
+    <div class="card"><div class="label">Invertido</div><div class="value blue" id="invested">--</div></div>
+    <div class="card"><div class="label">P&L Total</div><div class="value" id="pnl">--</div></div>
+    <div class="card"><div class="label">P&L %</div><div class="value" id="pnl-pct">--</div></div>
+    <div class="card"><div class="label">Ultimo Rebalanceo</div><div class="value" id="last-rebalance" style="font-size:16px">--</div></div>
+  </div>
+
+  <div class="section">
+    <h2>Posiciones Actuales</h2>
+    <table id="positions-table">
+      <thead>
+        <tr><th>Activo</th><th>Cantidad</th><th>Precio Entrada</th><th>Precio Actual</th><th>Valor</th><th>P&L</th><th>P&L %</th><th>Weight</th></tr>
+      </thead>
+      <tbody id="positions-body">
+        <tr><td colspan="8" class="loading">Cargando...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>Historial de Rebalanceos (ultimos 10)</h2>
+    <table id="history-table">
+      <thead>
+        <tr><th>Fecha</th><th>Regimen</th><th>Seleccionados</th><th>Cash %</th><th>Valor Total</th></tr>
+      </thead>
+      <tbody id="history-body">
+        <tr><td colspan="5" class="loading">Cargando...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>Log del Ultimo Run</h2>
+    <div id="log">Cargando log...</div>
+  </div>
+
+  <p class="refresh-info">
+    Dashboard se actualiza con cada commit del bot (cada 6h).<br>
+    <a href="#" id="actions-link">Ver runs en GitHub Actions</a>
+  </p>
+
+  <script>
+    // CAMBIA TU_USUARIO por tu usuario de GitHub
+    const GITHUB_USER = 'dogycarrasco';
+    const GITHUB_REPO = 'trading-bot';
+    const BRANCH = 'main';
+    const STATE_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${BRANCH}/trading_bot/results/live_state_v8.json`;
+    const LOG_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${BRANCH}/trading_bot/results/live_log_v8.txt`;
+    const ACTIONS_URL = `https://github.com/${GITHUB_USER}/${GITHUB_REPO}/actions`;
+
+    document.getElementById('actions-link').href = ACTIONS_URL;
+
+    async function loadJSON(url) {
+      try {
+        const r = await fetch(url + '?t=' + Date.now());
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return await r.json();
+      } catch (e) {
+        console.error('Error cargando', url, e);
+        return null;
+      }
+    }
+
+    async function loadText(url) {
+      try {
+        const r = await fetch(url + '?t=' + Date.now());
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return await r.text();
+      } catch (e) {
+        return 'No se pudo cargar el log. El repo es publico?';
+      }
+    }
+
+    function fmtMoney(v) {
+      return '$' + Number(v).toFixed(2);
+    }
+
+    function fmtPct(v) {
+      const sign = v >= 0 ? '+' : '';
+      return sign + Number(v).toFixed(2) + '%';
+    }
+
+    function colorClass(v) {
+      return v >= 0 ? 'green' : 'red';
+    }
+
+    async function render() {
+      const state = await loadJSON(STATE_URL);
+      if (!state) {
+        document.getElementById('positions-body').innerHTML = '<tr><td colspan="8" class="loading">No se pudo cargar el estado. Verifica que el repo sea publico y que GITHUB_USER/REPO esten configurados.</td></tr>';
+        return;
+      }
+
+      const cash = state.cash || 0;
+      const positions = state.positions || {};
+      let invested = 0;
+      let totalCost = 0;
+      Object.values(positions).forEach(p => {
+        invested += p.value || 0;
+        totalCost += (p.qty || 0) * (p.entry_price || 0);
+      });
+      const total = cash + invested;
+      const pnl = total - 500;
+      const pnlPct = (pnl / 500) * 100;
+
+      document.getElementById('total-value').textContent = fmtMoney(total);
+      document.getElementById('total-value').className = 'value ' + colorClass(pnl);
+      document.getElementById('cash').textContent = fmtMoney(cash);
+      document.getElementById('invested').textContent = fmtMoney(invested);
+      const pnlEl = document.getElementById('pnl');
+      pnlEl.textContent = fmtMoney(pnl);
+      pnlEl.className = 'value ' + colorClass(pnl);
+      const pnlPctEl = document.getElementById('pnl-pct');
+      pnlPctEl.textContent = fmtPct(pnlPct);
+      pnlPctEl.className = 'value ' + colorClass(pnlPct);
+
+      const lastReb = state.last_rebalance;
+      if (lastReb) {
+        const d = new Date(lastReb);
+        document.getElementById('last-rebalance').textContent = d.toLocaleString('es-EC', {dateStyle:'short', timeStyle:'short'});
+      }
+
+      const posBody = document.getElementById('positions-body');
+      if (Object.keys(positions).length === 0) {
+        posBody.innerHTML = '<tr><td colspan="8" class="loading">Sin posiciones (100% cash)</td></tr>';
+      } else {
+        posBody.innerHTML = Object.entries(positions).map(([sym, p]) => {
+          const currentPrice = p.value / p.qty;
+          const pnlPos = (currentPrice - p.entry_price) * p.qty;
+          const pnlPctPos = ((currentPrice / p.entry_price) - 1) * 100;
+          return `<tr>
+            <td><strong>${sym}</strong></td>
+            <td>${p.qty.toFixed(6)}</td>
+            <td>$${p.entry_price.toFixed(2)}</td>
+            <td>$${currentPrice.toFixed(2)}</td>
+            <td>${fmtMoney(p.value)}</td>
+            <td class="${pnlPos >= 0 ? 'pos' : 'neg'}">${fmtMoney(pnlPos)}</td>
+            <td class="${pnlPctPos >= 0 ? 'pos' : 'neg'}">${fmtPct(pnlPctPos)}</td>
+            <td>${(p.weight * 100).toFixed(1)}%</td>
+          </tr>`;
+        }).join('');
+      }
+
+      const history = state.history || [];
+      const histBody = document.getElementById('history-body');
+      if (history.length === 0) {
+        histBody.innerHTML = '<tr><td colspan="5" class="loading">Sin historial todavia</td></tr>';
+      } else {
+        const last10 = history.slice(-10).reverse();
+        histBody.innerHTML = last10.map(h => {
+          const d = new Date(h.date);
+          const regime = h.regime || 'NORMAL';
+          const regimeClass = regime.includes('PANIC') || regime.includes('FEAR') || regime.includes('BEAR') ? 'red' :
+                              regime.includes('BULL') || regime.includes('LOW_VIX') ? 'green' : 'blue';
+          return `<tr>
+            <td>${d.toLocaleString('es-EC', {dateStyle:'short', timeStyle:'short'})}</td>
+            <td><span class="badge ${regimeClass}">${regime}</span></td>
+            <td>${(h.selected || []).join(', ')}</td>
+            <td>${((h.cash_pct || 0) * 100).toFixed(0)}%</td>
+            <td>${fmtMoney(h.total_value || 0)}</td>
+          </tr>`;
+        }).join('');
+      }
+    }
+
+    async function loadLog() {
+      const log = await loadText(LOG_URL);
+      const lines = log.split('\n').slice(-50).join('\n');
+      document.getElementById('log').textContent = lines || 'Log vacio';
+    }
+
+    render();
+    loadLog();
+    setInterval(() => { render(); loadLog(); }, 5 * 60 * 1000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+name: Deploy Dashboard to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'trading_bot/docs/dashboard.html'
+      - 'trading_bot/results/live_state_v8.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Preparar sitio
+        run: |
+          mkdir -p _site
+          cp trading_bot/docs/dashboard.html _site/index.html
+          cp trading_bot/results/live_state_v8.json _site/ 2>/dev/null || echo '{"cash":500,"positions":{}}' > _site/live_state_v8.json
+          cp trading_bot/results/live_log_v8.txt _site/ 2>/dev/null || echo "Sin log todavía" > _site/live_log_v8.txt
+
+      - name: Subir artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy a GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,67 @@
+name: Trading Bot v9
+
+on:
+  schedule:
+    - cron: '0 0,6,12,18 * * *'
+  workflow_dispatch:
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout codigo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Instalar dependencias
+        run: |
+          pip install --quiet -r trading_bot/requirements.txt
+          pip install --quiet git+https://github.com/rongardF/tvdatafeed.git
+          pip install --quiet yfinance
+
+      - name: Restaurar cache de datos
+        uses: actions/cache@v4
+        with:
+          path: |
+            trading_bot/data/tv_cache/
+            trading_bot/data/external/
+          key: bot-data-${{ github.run_id }}
+          restore-keys: |
+            bot-data-
+
+      - name: Ejecutar ciclo del bot
+        run: |
+          cd trading_bot
+          python -m bot.main --once 2>&1 | tee ../live_run.log
+
+      - name: Guardar log como artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bot-log-${{ github.run_id }}
+          path: live_run.log
+          retention-days: 30
+
+      - name: Auto-commit del estado
+        if: always()
+        run: |
+          git config user.name "Trading Bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add trading_bot/results/live_state_v8.json trading_bot/results/live_log_v8.txt 2>/dev/null || true
+          git add trading_bot/data/external/fundamentals_cache.json 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "Sin cambios en estado, skip commit"
+          else
+            git commit -m "Bot v9 run: $(date -u '+%Y-%m-%d %H:%M UTC')" || echo "Nada que commitear"
+            git push
+          fi

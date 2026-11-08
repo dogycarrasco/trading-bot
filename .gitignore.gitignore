@@ -1,0 +1,49 @@
+# Datos cacheados (se regeneran solos via actions/cache)
+trading_bot/data/tv_cache/*.csv
+!trading_bot/data/tv_cache/_test_results.json
+!trading_bot/data/tv_cache/_v6_additional.json
+
+# FRED y external data (se regeneran)
+trading_bot/data/external/fred_*.csv
+trading_bot/data/external/coingecko_*.csv
+trading_bot/data/external/coincap_*.csv
+trading_bot/data/external/btc_*.csv
+trading_bot/data/external/fear_greed.csv
+
+# Pero SI guardamos fundamentals_cache
+!trading_bot/data/external/fundamentals_cache.json
+
+# Results pesados
+trading_bot/results/equity_*.csv
+trading_bot/results/trades_*.csv
+trading_bot/results/portfolio_equity.csv
+trading_bot/results/v*_portfolio_equity.csv
+trading_bot/results/v*_spy_buyhold.csv
+trading_bot/results/summary.json
+trading_bot/results/v*_summary.json
+trading_bot/results/images/
+
+# Pero SI guardamos estado live
+!trading_bot/results/live_state_v8.json
+!trading_bot/results/live_log_v8.txt
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Env
+.env
+.env.local
+*.log
