@@ -27,7 +27,34 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 
 from backtest.run_v8_hedge_fund import (
-    UNIVERSE_V8, load_tv_data, load_macro_features,
+def download_universe_data():
+    """Descarga datos frescos de TradingView si no existen en cache."""
+    from tvDatafeed import TvDatafeed, Interval
+    print("Descargando datos frescos de TradingView...")
+    tv = TvDatafeed()
+    for sym, exch, desc in UNIVERSE_V8:
+        cache_path = os.path.join(ROOT, "data", "tv_cache", f"{sym}_{exch}.csv")
+        if not os.path.exists(cache_path):
+            try:
+                df = tv.get_hist(symbol=sym, exchange=exch, interval=Interval.in_daily, n_bars=5000)
+                if df is not None and len(df) > 0:
+                    os.makedirs(os.path.dirname(cache_path), exist_ok=True)
+                    df.to_csv(cache_path)
+                    print(f"  {sym}: {len(df)} barras descargadas")
+            except Exception as e:
+                print(f"  {sym}: ERROR {e}")
+    # Tambien descargar VIX
+    vix_path = os.path.join(ROOT, "data", "tv_cache", "VIX_CBOE.csv")
+    if not os.path.exists(vix_path):
+        try:
+            df = tv.get_hist(symbol="VIX", exchange="CBOE", interval=Interval.in_daily, n_bars=5000)
+            if df is not None and len(df) > 0:
+                df.to_csv(vix_path)
+                print(f"  VIX: {len(df)} barras descargadas")
+        except Exception as e:
+            print(f"  VIX: ERROR {e}")
+    print("Datos descargados.")    
+UNIVERSE_V8, load_tv_data, load_macro_features,
     build_momentum_table, get_all_etf_scores, select_v8,
     compute_metrics, compute_spy_buyhold,
 )
