@@ -1,12 +1,3 @@
-"""
-Backtest v8 - Sector Rotation + agentes ai-hedge-fund + features macro + on-chain.
-
-Cambios vs v7:
-  1. Agentes Graham/Buffett/Munger/Lynch/Druckenmiller analizan holdings cada mes
-  2. Si un agente da bearish con alta confianza, reducir weight de ese activo
-  3. Si multiple agentes bullish, aumentar weight
-  4. Cache de fundamentales (no llamar yfinance cada mes)
-"""
 import os
 import sys
 import json
@@ -60,7 +51,6 @@ ETF_HOLDINGS = {
 
 
 def load_tv_data(symbol, exchange):
-    """Carga datos desde cache de TradingView."""
     path = os.path.join(CACHE_DIR, f"{symbol}_{exchange}.csv")
     if not os.path.exists(path):
         for exch in ["AMEX", "NASDAQ", "CME_MINI", "NYMEX", "COMEX", "FX", "BINANCE"]:
@@ -72,7 +62,6 @@ def load_tv_data(symbol, exchange):
 
 
 def load_macro_features():
-    """Carga VIX, Fear&Greed, FedFunds, yield curve."""
     print("\nCargando features macro...")
     vix = load_tv_data("VIX", "CBOE")
     vix_monthly = vix["close"].resample("ME").last() if not vix.empty else pd.Series(dtype=float)
@@ -114,7 +103,6 @@ def load_macro_features():
 
 
 def compute_multi_lookback_momentum(df):
-    """Momentum multi-lookback (3m + 6m + 12m) combinado con z-score."""
     monthly_close = df["close"].resample("ME").last()
     mom_3m = monthly_close.pct_change(3) * 100
     mom_6m = monthly_close.pct_change(6) * 100
@@ -132,7 +120,6 @@ def compute_multi_lookback_momentum(df):
 
 
 def build_momentum_table(universe):
-    """Construye tabla de momentum para todos los activos."""
     print(f"\nConstruyendo tabla de momentum para {len(universe)} activos...")
     from features.external_utils import detect_anomalies
     mom_data = {}
@@ -156,13 +143,10 @@ def build_momentum_table(universe):
     mom_df = pd.DataFrame(mom_data)
     if hasattr(mom_df.index, 'tz') and mom_df.index.tz is not None:
         mom_df.index = mom_df.index.tz_convert(None)
-    if anomaly_alerts:
-        print(f"  Anomalias detectadas (modified z-score >3.5): {anomaly_alerts}")
     return mom_df
 
 
 def get_etf_fundamentals_score(etf_symbol):
-    """Para un ETF, calcula score agregado de sus top holdings."""
     cache = {}
     if os.path.exists(FUND_CACHE):
         with open(FUND_CACHE) as f:
@@ -196,7 +180,6 @@ def get_etf_fundamentals_score(etf_symbol):
         cache[etf_symbol] = {
             'final_score': round(avg_score, 3),
             'n_holdings_analyzed': len(scores),
-            'holdings_scores': [round(s, 3) for s in scores],
         }
     with open(FUND_CACHE, 'w') as f:
         json.dump(cache, f, indent=2)
@@ -204,8 +187,7 @@ def get_etf_fundamentals_score(etf_symbol):
 
 
 def get_all_etf_scores():
-    """Obtiene scores fundamentales de todos los ETFs del universo."""
-    print("\nCalculando scores fundamentales de ETFs (agentes hedge fund)...")
+    print("\nCalculando scores fundamentales de ETFs...")
     scores = {}
     for sym, _, _ in UNIVERSE_V8:
         score = get_etf_fundamentals_score(sym)
@@ -218,7 +200,6 @@ def get_all_etf_scores():
 def select_v8(mom_df, features, etf_scores, top_n_base=3,
               max_crypto_weight=0.30, max_single_asset=0.40,
               bubble_threshold=80.0, bubble_penalty=0.5):
-    """Seleccion v8: momentum + VIX rules + fundamentales (agentes)."""
     CRYPTO_SYMBOLS = {"BTCUSD", "ETHUSD", "SOLUSD", "BNBUSD", "XRPUSD", "ADAUSD"}
     weights = pd.DataFrame(0.0, index=mom_df.index, columns=mom_df.columns)
     selections = []
@@ -296,10 +277,10 @@ def select_v8(mom_df, features, etf_scores, top_n_base=3,
                 fund_alerts.append(f"{asset} bullish ({fund_score:+.2f})")
             elif fund_score < -0.30:
                 weights_top[asset] = 0
-                fund_alerts.append(f"{asset} very bearish ({fund_score:+.2f}), excluido")
+                fund_alerts.append(f"{asset} very bearish")
             elif fund_score < -0.15:
                 weights_top[asset] *= 0.50
-                fund_alerts.append(f"{asset} bearish ({fund_score:+.2f})")
+                fund_alerts.append(f"{asset} bearish")
         if weights_top.sum() == 0:
             cash_months += 1
             selections.append({"month": month, "selected": ["CASH"], "regime": regime + "_ALL_BEARISH",
@@ -346,7 +327,6 @@ def select_v8(mom_df, features, etf_scores, top_n_base=3,
 
 
 def backtest_v8(weights_df, mom_df, initial_capital=500.0):
-    """Backtest mensual con vol targeting."""
     print("\nCargando retornos mensuales para backtest...")
     monthly_returns = {}
     for sym in weights_df.columns:
@@ -405,7 +385,7 @@ def compute_metrics(equity, monthly_returns):
 
 def main():
     print("=" * 70)
-    print("BACKTEST v8 - Agentes ai-hedge-fund + features macro + on-chain")
+    print("BACKTEST v8 - Agentes ai-hedge-fund")
     print("=" * 70)
 
     features = load_macro_features()
@@ -413,7 +393,6 @@ def main():
     print(f"Activos validos: {len(mom_df.columns)}")
 
     etf_scores = get_all_etf_scores()
-    print(f"\nETFs con score fundamental: {len(etf_scores)}")
 
     print("\nSeleccion con agentes + macro...")
     weights, selections, cash_months = select_v8(mom_df, features, etf_scores)
@@ -424,44 +403,20 @@ def main():
     spy_eq, spy_rets = compute_spy_buyhold(500.0)
     spy_metrics = compute_metrics(spy_eq, spy_rets)
 
-    print("\n" + "=" * 70)
-    print("RESULTADO v8")
-    print("=" * 70)
-    print(f"\nBot v8:")
+    print("\nBot v8:")
     print(f"  Capital final: ${metrics['final_equity']}")
     print(f"  CAGR: {metrics['cagr_pct']:+.2f}%")
-    print(f"  Sharpe: {metrics['sharpe']}")
     print(f"  Max DD: {metrics['max_drawdown_pct']:.2f}%")
-
-    print(f"\nSPY buy&hold:")
-    print(f"  Capital final: ${spy_metrics['final_equity']}")
-    print(f"  CAGR: {spy_metrics['cagr_pct']:+.2f}%")
-    print(f"  Sharpe: {spy_metrics['sharpe']}")
-    print(f"  Max DD: {spy_metrics['max_drawdown_pct']:.2f}%")
-
-    bot_y = metrics["annual_returns"]
-    spy_y = spy_metrics["annual_returns"]
-    bot_wins_spy = sum(1 for y, v in bot_y.items() if v > spy_y.get(y, 0))
-    bot_wins_infl = sum(1 for y, v in bot_y.items() if v > 17.0)
-    delta_spy = metrics["cagr_pct"] - spy_metrics["cagr_pct"]
-    delta_infl = metrics["cagr_pct"] - 17.0
-
-    print(f"\nBot > SPY:    {bot_wins_spy}/{len(bot_y)} anos")
-    print(f"Bot > Infl:   {bot_wins_infl}/{len(bot_y)} anos")
-    print(f"Bot vs SPY:  {delta_spy:+.2f}pp")
-    print(f"Bot vs Infl: {delta_infl:+.2f}pp")
 
     results_dir = os.path.join(ROOT, "results")
     os.makedirs(results_dir, exist_ok=True)
     summary = {
-        "strategy": "v8_hedge_fund_agents_macro",
+        "strategy": "v8",
         "bot_metrics": {k: v for k, v in metrics.items() if k != "annual_returns"},
         "bot_annual_returns": {str(k.year): round(float(v), 2) for k, v in metrics["annual_returns"].items()},
         "spy_metrics": {k: v for k, v in spy_metrics.items() if k != "annual_returns"},
         "spy_annual_returns": {str(k.year): round(float(v), 2) for k, v in spy_metrics["annual_returns"].items()},
         "etf_fundamental_scores": etf_scores,
-        "benchmark": {"inflation_real_ecuador_annual": 0.17},
-        "agents_used": ["graham", "buffett", "munger", "lynch", "druckenmiller"],
         "selections_last_6_months": [
             {
                 "month": s["month"].strftime("%Y-%m"),
