@@ -446,8 +446,8 @@ def main():
     delta_spy = metrics["cagr_pct"] - spy_metrics["cagr_pct"]
     delta_infl = metrics["cagr_pct"] - 17.0
 
-    print(f"\nBot > SPY:    {bot_wins_spy}/{len(bot_y)} años")
-    print(f"Bot > Infl:   {bot_wins_infl}/{len(bot_y)} años")
+    print(f"\nBot > SPY:    {bot_wins_spy}/{len(bot_y)} anos")
+    print(f"Bot > Infl:   {bot_wins_infl}/{len(bot_y)} anos")
     print(f"Bot vs SPY:  {delta_spy:+.2f}pp")
     print(f"Bot vs Infl: {delta_infl:+.2f}pp")
 

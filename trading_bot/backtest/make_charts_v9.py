@@ -106,7 +106,7 @@ def plot_yoy_table(summary):
         win_infl = "GANA" if diff_infl > 0 else "PIERDE"
         rows.append([y, f"{bot:+.1f}%", f"{spy:+.1f}%", f"{infl:.0f}%",
                      f"{diff_spy:+.1f}pp", win_spy, win_infl])
-    cols = ["Año", "Bot v9", "SPY", "Inflacion\nEC", "vs SPY", "vs SPY?", "vs Infl?"]
+    cols = ["Ano", "Bot v9", "SPY", "Inflacion\nEC", "vs SPY", "vs SPY?", "vs Infl?"]
     table = ax.table(cellText=rows, colLabels=cols, loc="center", cellLoc="center")
     table.auto_set_font_size(False)
     table.set_fontsize(8)
@@ -123,7 +123,7 @@ def plot_yoy_table(summary):
     for j in range(len(cols)):
         table[(0, j)].set_facecolor("#1B2A4E")
         table[(0, j)].set_text_props(color="white", fontweight="bold")
-    ax.set_title("20 años (2007-2026): Bot v9 vs SPY vs Inflacion real EC (17%)",
+    ax.set_title("20 anos (2007-2026): Bot v9 vs SPY vs Inflacion real EC (17%)",
                  fontsize=12, fontweight="bold", pad=15)
     plt.tight_layout()
     plt.savefig(os.path.join(IMAGES, "v9_yoy_table.png"), dpi=110, bbox_inches="tight")

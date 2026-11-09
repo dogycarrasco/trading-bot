@@ -111,11 +111,11 @@ def build_pdf():
     delta_infl = bm["cagr_pct"] - 17.0
 
     flow.append(Paragraph(
-        f"<b>RESULTADO 20 AÑOS (v9):</b><br/>"
+        f"<b>RESULTADO 20 AnOS (v9):</b><br/>"
         f"&bull; Bot v9: ${bm['final_equity']:.0f} ({bm['total_return_pct']:+.1f}%, CAGR <b>{bm['cagr_pct']:+.2f}%</b>)<br/>"
         f"&bull; SPY: ${sm['final_equity']:.0f} ({sm['total_return_pct']:+.1f}%, CAGR {sm['cagr_pct']:+.2f}%)<br/>"
-        f"&bull; Bot le gana al SPY en <b>{bot_wins_spy}/{len(bot_y)} años</b><br/>"
-        f"&bull; Bot supera inflacion EC 17% en {bot_wins_infl}/{len(bot_y)} años<br/>"
+        f"&bull; Bot le gana al SPY en <b>{bot_wins_spy}/{len(bot_y)} anos</b><br/>"
+        f"&bull; Bot supera inflacion EC 17% en {bot_wins_infl}/{len(bot_y)} anos<br/>"
         f"&bull; <b>PRIMERA VEZ que el bot supera el 17% de inflacion real EC</b> (+{delta_infl:.2f}pp)",
         WIN_ALERT
     ))
@@ -145,7 +145,7 @@ def build_pdf():
 
     if os.path.exists(os.path.join(IMAGES, "v9_equity.png")):
         flow.append(Image(os.path.join(IMAGES, "v9_equity.png"), width=17 * cm, height=7.8 * cm))
-        flow.append(Paragraph("Figura 1. Equity curves 20 años: bot v9 (azul) vs SPY (rojo punteado).", CAPTION))
+        flow.append(Paragraph("Figura 1. Equity curves 20 anos: bot v9 (azul) vs SPY (rojo punteado).", CAPTION))
 
     flow.append(PageBreak())
 
@@ -170,7 +170,7 @@ def build_pdf():
 
     if os.path.exists(os.path.join(IMAGES, "v9_yoy_table.png")):
         flow.append(PageBreak())
-        flow.append(Paragraph("3. Año por año (2007-2026)", H1))
+        flow.append(Paragraph("3. Ano por ano (2007-2026)", H1))
         flow.append(Image(os.path.join(IMAGES, "v9_yoy_table.png"), width=17 * cm, height=14 * cm))
 
     if os.path.exists(os.path.join(IMAGES, "v9_yoy.png")):
@@ -182,7 +182,7 @@ def build_pdf():
     flow.append(Paragraph("5. Conclusion", H1))
     flow.append(Paragraph(
         f"v9 cumple el objetivo: CAGR {bm['cagr_pct']:+.2f}% supera el 17% de inflacion real EC por {delta_infl:+.2f}pp. "
-        f"En 20 años, $500 ? ${bm['final_equity']:.0f} vs ${sm['final_equity']:.0f} del SPY. "
+        f"En 20 anos, $500 ? ${bm['final_equity']:.0f} vs ${sm['final_equity']:.0f} del SPY. "
         f"Diferencia +${bm['final_equity']-sm['final_equity']:.0f}.",
         BODY))
     flow.append(Paragraph(
