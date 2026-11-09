@@ -78,7 +78,7 @@ jobs:
           print('Datos descargados.')
           "
 
-      - name: Ejecutar rebalanceo del bot
+      - name: Ejecutar ciclo del bot
         id: bot
         continue-on-error: true
         run: |
@@ -110,7 +110,7 @@ jobs:
               print(f'Error tearsheet: {e}')
           "
 
-      - name: Asegurar que existe estado (fallback si bot fallo)
+      - name: Asegurar que existe estado (fallback)
         run: |
           mkdir -p trading_bot/results
           if [ ! -f trading_bot/results/live_state_v8.json ]; then
