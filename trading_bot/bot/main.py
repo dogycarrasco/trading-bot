@@ -1,8 +1,9 @@
 """
 Orquestador live paper trading - Bot v8/v9.
 
-Ciclo: cada barra, revisa si toca rebalancear.
-Rebalanceo mensual: primer dia habil del mes.
+- Si no hay posiciones: invierte automaticamente
+- Si hay posiciones: actualiza precios y deja crecer
+- Dia 1 del mes: rebalancea (rota si hace falta)
 """
 import os
 import sys
@@ -25,17 +26,14 @@ from backtest.run_v8_hedge_fund import (
 
 
 def download_universe_data():
-    """Descarga datos frescos de TradingView si no existen en cache."""
     try:
         from tvDatafeed import TvDatafeed, Interval
     except ImportError:
-        print("ERROR: tvDatafeed no instalado")
         return
     print("Descargando datos frescos de TradingView...")
     try:
         tv = TvDatafeed()
-    except Exception as e:
-        print(f"ERROR conectando a TradingView: {e}")
+    except Exception:
         return
     for sym, exch, desc in UNIVERSE_V8:
         cache_path = os.path.join(ROOT, "data", "tv_cache", f"{sym}_{exch}.csv")
@@ -45,26 +43,21 @@ def download_universe_data():
                 if df is not None and len(df) > 0:
                     os.makedirs(os.path.dirname(cache_path), exist_ok=True)
                     df.to_csv(cache_path)
-                    print(f"  {sym}: {len(df)} barras descargadas")
-                else:
-                    print(f"  {sym}: sin datos")
-            except Exception as e:
-                print(f"  {sym}: ERROR {e}")
-    # Tambien descargar VIX
+                    print(f"  {sym}: {len(df)} barras")
+            except Exception:
+                pass
     vix_path = os.path.join(ROOT, "data", "tv_cache", "VIX_CBOE.csv")
     if not os.path.exists(vix_path):
         try:
             df = tv.get_hist(symbol="VIX", exchange="CBOE", interval=Interval.in_daily, n_bars=5000)
             if df is not None and len(df) > 0:
                 df.to_csv(vix_path)
-                print(f"  VIX: {len(df)} barras descargadas")
-        except Exception as e:
-            print(f"  VIX: ERROR {e}")
+        except Exception:
+            pass
     print("Datos descargados.")
 
 
 class TradingBotV8:
-    """Bot v8 para paper trading live."""
 
     def __init__(self, config_path=None):
         if config_path is None:
@@ -111,13 +104,11 @@ class TradingBotV8:
             self.log(f"ERROR guardando estado: {e}")
 
     def connect_brokers(self):
-        """Conecta brokers paper. Por ahora: paper trading simulado."""
-        self.log("Modo: PAPER TRADING SIMULADO (sin broker real)")
+        self.log("Modo: PAPER TRADING SIMULADO")
         self.log(f"Capital inicial: ${self.state.get('cash', 500.0):.2f}")
-        self.log(f"Posiciones actuales: {self.state.get('positions', {})}")
+        self.log(f"Posiciones actuales: {list(self.state.get('positions', {}).keys())}")
 
     def is_rebalance_day(self):
-        """Rebalancear el primer dia habil del mes."""
         today = datetime.now(timezone.utc).date()
         if today.day <= 3 and today.weekday() < 5:
             last = self.state.get("last_rebalance")
@@ -128,26 +119,27 @@ class TradingBotV8:
             return True
         return False
 
+    def has_positions(self):
+        positions = self.state.get("positions", {})
+        return len(positions) > 0
+
     def run_rebalance(self):
-        """Ejecuta rebalanceo mensual completo."""
         download_universe_data()
         self.log("=" * 60)
-        self.log("REBALANCEO MENSUAL - Bot v8")
+        self.log("REBALANCEO - Bot v8")
         self.log("=" * 60)
 
-        self.log("Cargando features macro (VIX, FedFunds, yield curve)...")
+        self.log("Cargando features macro...")
         try:
             features = load_macro_features()
             if not features.empty:
                 last_feat = features.iloc[-1]
-                self.log(f"  VIX={last_feat.get('vix', 'n/a')}, "
-                         f"FedFunds={last_feat.get('fed_funds', 'n/a')}, "
-                         f"yield_spread={last_feat.get('yield_spread', 'n/a')}")
+                self.log(f"  VIX={last_feat.get('vix', 'n/a')}")
         except Exception as e:
             self.log(f"ERROR cargando features macro: {e}")
             features = pd.DataFrame()
 
-        self.log("Calculando momentum multi-lookback...")
+        self.log("Calculando momentum...")
         try:
             mom_df = build_momentum_table(UNIVERSE_V8)
             if mom_df.empty:
@@ -157,14 +149,14 @@ class TradingBotV8:
             self.log(f"ERROR calculando momentum: {e}")
             return
 
-        self.log("Cargando scores fundamentales (agentes hedge fund)...")
+        self.log("Cargando scores fundamentales...")
         try:
             etf_scores = get_all_etf_scores()
         except Exception as e:
-            self.log(f"ERROR cargando scores fundamentales: {e}")
+            self.log(f"ERROR scores fundamentales: {e}")
             etf_scores = {}
 
-        self.log("Seleccionando top-3 con regime-aware...")
+        self.log("Seleccionando top-3...")
         try:
             weights, selections, cash_months = select_v8(mom_df, features, etf_scores)
             if not selections:
@@ -175,18 +167,18 @@ class TradingBotV8:
             return
 
         last_selection = selections[-1]
-        self.log(f"Mes actual: {last_selection['month'].strftime('%Y-%m')}")
         self.log(f"Regimen: {last_selection.get('regime', 'NORMAL')}")
-        self.log(f"Razones: {last_selection.get('reasons', [])}")
         self.log(f"Cash %: {last_selection.get('cash_pct', 0)*100:.1f}%")
         self.log(f"Seleccionados: {last_selection.get('selected', [])}")
-        if "weights" in last_selection:
-            for asset, w in last_selection["weights"].items():
-                self.log(f"  {asset}: {w*100:.1f}%")
 
-        cash = self.state.get("cash", 500.0) + sum(p.get("value", 0) for p in self.state.get("positions", {}).values())
+        # Calcular capital total (cash + valor posiciones actuales)
+        cash = self.state.get("cash", 500.0)
+        current_positions = self.state.get("positions", {})
+        current_value = sum(p.get("value", 0) for p in current_positions.values())
+        total_capital = cash + current_value
+
         cash_pct = last_selection.get("cash_pct", 0)
-        investable = cash * (1 - cash_pct)
+        investable = total_capital * (1 - cash_pct)
 
         new_positions = {}
         if "weights" in last_selection:
@@ -205,9 +197,7 @@ class TradingBotV8:
                         }
                         self.log(f"  >>> {asset}: qty={qty:.6f} @ ${price:.2f} = ${target_value:.2f}")
 
-        cash_remaining = cash - sum(p["value"] for p in new_positions.values())
-        
-        # Guardar estado inmediatamente (a prueba de fallos)
+        cash_remaining = total_capital - sum(p["value"] for p in new_positions.values())
         self.state["positions"] = new_positions
         self.state["cash"] = cash_remaining
         self.state["last_rebalance"] = datetime.now(timezone.utc).isoformat()
@@ -216,69 +206,99 @@ class TradingBotV8:
             "regime": last_selection.get("regime"),
             "selected": last_selection.get("selected"),
             "cash_pct": cash_pct,
-            "total_value": cash,
+            "total_value": total_capital,
         })
-        
+
         self._save_state()
-        self.log(f"Estado guardado en {self.state_path}")
-        self.log(f"Total portfolio: ${cash:.2f} (cash: ${cash_remaining:.2f}, invertido: ${cash - cash_remaining:.2f})")
+        self.log(f"Estado guardado. Total: ${total_capital:.2f}")
 
     def daily_check(self):
-        """Chequeo diario: actualizar precios, P&L."""
+        """Actualiza precios de las posiciones y recalcula P&L."""
         positions = self.state.get("positions", {})
         if not positions:
+            self.log("Sin posiciones. Total: $500.00 (cash)")
             return
 
-        total_value = self.state.get("cash", 0)
+        cash = self.state.get("cash", 0)
+        total_value = cash
+        updated_positions = {}
+
         for asset, pos in positions.items():
             df = load_tv_data(asset, "")
             if not df.empty:
                 current_price = float(df["close"].iloc[-1])
                 qty = pos.get("qty", 0)
+                entry_price = pos.get("entry_price", current_price)
                 value = qty * current_price
-                pnl = (current_price - pos.get("entry_price", 0)) * qty
-                pnl_pct = (current_price / pos.get("entry_price", 1) - 1) * 100 if pos.get("entry_price") else 0
+                pnl = (current_price - entry_price) * qty
+                pnl_pct = ((current_price / entry_price) - 1) * 100 if entry_price > 0 else 0
                 total_value += value
+
+                # ACTUALIZAR el valor de la posicion con el precio actual
+                updated_positions[asset] = {
+                    "qty": qty,
+                    "entry_price": entry_price,
+                    "value": value,
+                    "current_price": current_price,
+                    "weight": pos.get("weight", 0),
+                }
+
                 self.log(f"  {asset}: ${current_price:.2f} x {qty:.6f} = ${value:.2f} (P&L {pnl:+.2f}, {pnl_pct:+.2f}%)")
+            else:
+                updated_positions[asset] = pos
+                total_value += pos.get("value", 0)
 
-        self.log(f"Total portfolio value: ${total_value:.2f}")
+        # Guardar posiciones actualizadas
+        self.state["positions"] = updated_positions
 
+        total_pnl = total_value - 500
+        total_pnl_pct = (total_pnl / 500) * 100
+        self.log(f"Total: ${total_value:.2f} (P&L {total_pnl:+.2f}, {total_pnl_pct:+.2f}%)")
+
+        # Guardar snapshot diario
         snapshot = {
             "date": datetime.now(timezone.utc).isoformat(),
             "total_value": total_value,
-            "cash": self.state.get("cash", 0),
-            "positions_count": len(positions),
+            "cash": cash,
+            "positions_count": len(updated_positions),
+            "pnl": total_pnl,
+            "pnl_pct": total_pnl_pct,
         }
         if "daily_snapshots" not in self.state:
             self.state["daily_snapshots"] = []
         self.state["daily_snapshots"].append(snapshot)
         if len(self.state["daily_snapshots"]) > 90:
             self.state["daily_snapshots"] = self.state["daily_snapshots"][-90:]
+
         self._save_state()
 
     def run_cycle(self):
-        """Un ciclo: chequeo diario + rebalanceo si toca."""
         self.log("=" * 60)
         self.log("Ciclo bot v8")
         self.log("=" * 60)
 
-        if self.is_rebalance_day():
-            self.log("Es dia de rebalanceo mensual.")
+        # LOGICA CLAVE:
+        # 1. Si no hay posiciones -> INVERTIR (rebalancear para tomar posiciones)
+        # 2. Si hay posiciones y es dia 1 del mes -> REBALANCEAR (rotar)
+        # 3. Si hay posiciones y no es dia 1 -> SOLO ACTUALIZAR PRECIOS (dejar crecer)
+
+        if not self.has_positions():
+            self.log("Sin posiciones - invirtiendo automaticamente...")
+            self.run_rebalance()
+        elif self.is_rebalance_day():
+            self.log("Es dia de rebalanceo mensual - rotando posiciones...")
             self.run_rebalance()
         else:
-            self.log("No es dia de rebalanceo. Chequeo diario.")
-        self.daily_check()
+            self.log("Actualizando precios (dejando crecer)...")
+            self.daily_check()
+
         self.log("Ciclo completado")
 
     def run(self, interval_seconds=3600):
-        """Loop infinito hasta Ctrl-C."""
         self.running = True
-        self.log(f"Bot v8 iniciado. Intervalo: {interval_seconds}s. Ctrl-C para parar.")
-        self.log(f"Log: {self.log_path}")
-        self.log(f"State: {self.state_path}")
+        self.log(f"Bot v8 iniciado. Ctrl-C para parar.")
 
         def handle_sig(signum, frame):
-            self.log("Senal de parada recibida. Cerrando...")
             self.running = False
         sig_module.signal(sig_module.SIGINT, handle_sig)
         sig_module.signal(sig_module.SIGTERM, handle_sig)
