@@ -49,6 +49,35 @@ jobs:
           restore-keys: |
             bot-data-
 
+      - name: Descargar datos de TradingView
+        run: |
+          cd trading_bot
+          python -c "
+          from tvDatafeed import TvDatafeed, Interval
+          import os, pandas as pd
+          tv = TvDatafeed()
+          universe = [
+              ('SPY','AMEX'),('QQQ','NASDAQ'),('XLK','AMEX'),('XLF','AMEX'),('XLE','AMEX'),
+              ('XLV','AMEX'),('XLY','AMEX'),('XLP','AMEX'),('XLI','AMEX'),('XLU','AMEX'),
+              ('GLD','AMEX'),('USO','AMEX'),
+              ('BTCUSD','BINANCE'),('ETHUSD','BINANCE'),('SOLUSD','BINANCE'),
+              ('BNBUSD','BINANCE'),('XRPUSD','BINANCE'),('ADAUSD','BINANCE'),
+              ('VIX','CBOE')
+          ]
+          os.makedirs('data/tv_cache', exist_ok=True)
+          for sym, exch in universe:
+              path = f'data/tv_cache/{sym}_{exch}.csv'
+              if not os.path.exists(path):
+                  try:
+                      df = tv.get_hist(symbol=sym, exchange=exch, interval=Interval.in_daily, n_bars=5000)
+                      if df is not None and len(df) > 0:
+                          df.to_csv(path)
+                          print(f'{sym}: {len(df)} barras')
+                  except Exception as e:
+                      print(f'{sym}: ERROR {e}')
+          print('Datos descargados.')
+          "
+
       - name: Ejecutar rebalanceo del bot
         id: bot
         continue-on-error: true
