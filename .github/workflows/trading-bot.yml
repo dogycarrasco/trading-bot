@@ -54,7 +54,7 @@ jobs:
           cd trading_bot
           python -c "
           from tvDatafeed import TvDatafeed, Interval
-          import os, pandas as pd
+          import os
           tv = TvDatafeed()
           universe = [
               ('SPY','AMEX'),('QQQ','NASDAQ'),('XLK','AMEX'),('XLF','AMEX'),('XLE','AMEX'),
@@ -85,7 +85,24 @@ jobs:
           cd trading_bot
           python -m bot.main --rebalance 2>&1 | tee ../live_run.log
 
-      - name: Asegurar que existe estado (fallback si bot fallo)
+      - name: DEBUG - Verificar estado del bot
+        run: |
+          echo "=== Existe live_state_v8.json? ==="
+          ls -la trading_bot/results/live_state_v8.json 2>/dev/null || echo "NO EXISTE"
+          echo ""
+          echo "=== Contenido del JSON ==="
+          cat trading_bot/results/live_state_v8.json 2>/dev/null || echo "ARCHIVO NO ENCONTRADO"
+          echo ""
+          echo "=== Existe live_log_v8.txt? ==="
+          ls -la trading_bot/results/live_log_v8.txt 2>/dev/null || echo "NO EXISTE"
+          echo ""
+          echo "=== Ultimas 10 lineas del log ==="
+          tail -10 trading_bot/results/live_log_v8.txt 2>/dev/null || echo "LOG NO ENCONTRADO"
+          echo ""
+          echo "=== Contenido de live_run.log ==="
+          cat live_run.log 2>/dev/null || echo "live_run.log NO ENCONTRADO"
+
+      - name: Asegurar que existe estado (fallback)
         run: |
           mkdir -p trading_bot/results
           if [ ! -f trading_bot/results/live_state_v8.json ]; then
@@ -95,7 +112,7 @@ jobs:
           if [ ! -f trading_bot/results/live_log_v8.txt ]; then
             echo "Sin log disponible" > trading_bot/results/live_log_v8.txt
           fi
-          cat ../live_run.log >> trading_bot/results/live_log_v8.txt 2>/dev/null || true
+          cp live_run.log trading_bot/results/live_log_v8.txt 2>/dev/null || true
 
       - name: Preparar sitio web
         run: |
