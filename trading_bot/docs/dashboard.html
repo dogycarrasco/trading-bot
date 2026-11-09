@@ -50,10 +50,10 @@
     <h2>Posiciones Actuales</h2>
     <table id="positions-table">
       <thead>
-        <tr><th>Activo</th><th>Cantidad</th><th>Precio Entrada</th><th>Precio Actual</th><th>Valor</th><th>P&L</th><th>P&L %</th><th>Weight</th></tr>
+        <tr><th>Activo</th><th>Cantidad</th><th>Precio Entrada</th><th>Valor Inicial</th><th>Weight</th></tr>
       </thead>
       <tbody id="positions-body">
-        <tr><td colspan="8" class="loading">Cargando...</td></tr>
+        <tr><td colspan="5" class="loading">Cargando...</td></tr>
       </tbody>
     </table>
   </div>
@@ -112,7 +112,7 @@
     async function render() {
       const state = await loadJSON(STATE_URL);
       if (!state) {
-        document.getElementById('positions-body').innerHTML = '<tr><td colspan="8" class="loading">No se pudo cargar el estado.</td></tr>';
+        document.getElementById('positions-body').innerHTML = '<tr><td colspan="5" class="loading">No se pudo cargar el estado.</td></tr>';
         return;
       }
 
@@ -145,19 +145,14 @@
 
       const posBody = document.getElementById('positions-body');
       if (Object.keys(positions).length === 0) {
-        posBody.innerHTML = '<tr><td colspan="8" class="loading">Sin posiciones (100% cash)</td></tr>';
+        posBody.innerHTML = '<tr><td colspan="5" class="loading">Sin posiciones (100% cash)</td></tr>';
       } else {
         posBody.innerHTML = Object.entries(positions).map(([sym, p]) => {
-          const pnlPos = (p.entry_price - p.entry_price) * p.qty;
-          const pnlPctPos = 0;
           return '<tr>' +
             '<td><strong>' + sym + '</strong></td>' +
             '<td>' + p.qty.toFixed(6) + '</td>' +
             '<td>$' + p.entry_price.toFixed(2) + '</td>' +
-            '<td>$' + p.entry_price.toFixed(2) + '</td>' +
             '<td>' + fmtMoney(p.value) + '</td>' +
-            '<td class="pos">' + fmtMoney(0) + '</td>' +
-            '<td class="pos">' + fmtPct(0) + '</td>' +
             '<td>' + (p.weight * 100).toFixed(1) + '%</td>' +
           '</tr>';
         }).join('');
