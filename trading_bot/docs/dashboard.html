@@ -104,7 +104,7 @@
 </head>
 <body>
   <h1>Trading Bot v9</h1>
-  <p class="subtitle">Dashboard paper trading — corre en GitHub Actions cada 6h</p>
+  <p class="subtitle">Dashboard paper trading â€” corre en GitHub Actions cada 6h</p>
 
   <div class="grid" id="kpis">
     <div class="card"><div class="label">Capital Total</div><div class="value" id="total-value">--</div></div>
@@ -151,7 +151,9 @@
 
   <script>
     // CAMBIA TU_USUARIO por tu usuario de GitHub
-    const GITHUB_USER = 'dogycarrasco';
+    const STATE_URL = './live_state_v8.json';
+    const LOG_URL = './live_log_v8.txt';
+    const ACTIONS_URL = 'https://github.com/dogycarrasco/trading-bot/actions';
     const GITHUB_REPO = 'trading-bot';
     const BRANCH = 'main';
     const STATE_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${BRANCH}/trading_bot/results/live_state_v8.json`;
