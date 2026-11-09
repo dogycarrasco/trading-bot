@@ -88,18 +88,27 @@ class TradingBotV8:
         ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
         line = f"[{ts}] {msg}"
         print(line)
-        with open(self.log_path, "a") as f:
-            f.write(line + "\n")
+        try:
+            with open(self.log_path, "a") as f:
+                f.write(line + "\n")
+        except Exception:
+            pass
 
     def _load_state(self):
         if os.path.exists(self.state_path):
-            with open(self.state_path) as f:
-                return json.load(f)
+            try:
+                with open(self.state_path) as f:
+                    return json.load(f)
+            except Exception:
+                pass
         return {"positions": {}, "cash": 500.0, "history": [], "last_rebalance": None}
 
     def _save_state(self):
-        with open(self.state_path, "w") as f:
-            json.dump(self.state, f, indent=2, default=str)
+        try:
+            with open(self.state_path, "w") as f:
+                json.dump(self.state, f, indent=2, default=str)
+        except Exception as e:
+            self.log(f"ERROR guardando estado: {e}")
 
     def connect_brokers(self):
         """Conecta brokers paper. Por ahora: paper trading simulado."""
@@ -197,6 +206,8 @@ class TradingBotV8:
                         self.log(f"  >>> {asset}: qty={qty:.6f} @ ${price:.2f} = ${target_value:.2f}")
 
         cash_remaining = cash - sum(p["value"] for p in new_positions.values())
+        
+        # Guardar estado inmediatamente (a prueba de fallos)
         self.state["positions"] = new_positions
         self.state["cash"] = cash_remaining
         self.state["last_rebalance"] = datetime.now(timezone.utc).isoformat()
@@ -207,7 +218,9 @@ class TradingBotV8:
             "cash_pct": cash_pct,
             "total_value": cash,
         })
+        
         self._save_state()
+        self.log(f"Estado guardado en {self.state_path}")
         self.log(f"Total portfolio: ${cash:.2f} (cash: ${cash_remaining:.2f}, invertido: ${cash - cash_remaining:.2f})")
 
     def daily_check(self):
