@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -138,3 +138,13 @@ jobs:
       - name: Deploy a GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Guardar estado del bot (commit)
+        run: |
+          git config user.name "Trading Bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add trading_bot/results/live_state_v8.json
+          git add trading_bot/results/live_log_v8.txt
+          git add trading_bot/data/external/fundamentals_cache.json 2>/dev/null || true
+          git commit -m "Estado bot: $(date -u '+%Y-%m-%d %H:%M')" || echo "Nada que commitear"
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:main || echo "Push fallido"
