@@ -1,16 +1,7 @@
 """
 Orquestador live paper trading - Bot v8/v9.
 
-Estrategia: Sector Rotation Top-3 mensual con:
-  - Momentum multi-lookback (3m/6m/12m)
-  - VIX rules + FedFunds + yield curve (regime-aware)
-  - Agentes ai-hedge-fund (Graham/Buffett/Munger/Lynch/Druckenmiller)
-  - SEC EDGAR fundamentales (sin API key)
-  - Anomaly detection (Metabase modified z-score)
-  - Anti-bubble + caps
-  - v9: stop-loss + crypto winter + smart money exit
-
-Ciclo: cada barra (diaria por defecto), revisa si toca rebalancear.
+Ciclo: cada barra, revisa si toca rebalancear.
 Rebalanceo mensual: primer dia habil del mes.
 """
 import os
@@ -27,11 +18,25 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 
 from backtest.run_v8_hedge_fund import (
+    UNIVERSE_V8, load_tv_data, load_macro_features,
+    build_momentum_table, get_all_etf_scores, select_v8,
+    compute_metrics, compute_spy_buyhold,
+)
+
+
 def download_universe_data():
     """Descarga datos frescos de TradingView si no existen en cache."""
-    from tvDatafeed import TvDatafeed, Interval
+    try:
+        from tvDatafeed import TvDatafeed, Interval
+    except ImportError:
+        print("ERROR: tvDatafeed no instalado")
+        return
     print("Descargando datos frescos de TradingView...")
-    tv = TvDatafeed()
+    try:
+        tv = TvDatafeed()
+    except Exception as e:
+        print(f"ERROR conectando a TradingView: {e}")
+        return
     for sym, exch, desc in UNIVERSE_V8:
         cache_path = os.path.join(ROOT, "data", "tv_cache", f"{sym}_{exch}.csv")
         if not os.path.exists(cache_path):
@@ -41,6 +46,8 @@ def download_universe_data():
                     os.makedirs(os.path.dirname(cache_path), exist_ok=True)
                     df.to_csv(cache_path)
                     print(f"  {sym}: {len(df)} barras descargadas")
+                else:
+                    print(f"  {sym}: sin datos")
             except Exception as e:
                 print(f"  {sym}: ERROR {e}")
     # Tambien descargar VIX
@@ -53,11 +60,7 @@ def download_universe_data():
                 print(f"  VIX: {len(df)} barras descargadas")
         except Exception as e:
             print(f"  VIX: ERROR {e}")
-    print("Datos descargados.")    
-UNIVERSE_V8, load_tv_data, load_macro_features,
-    build_momentum_table, get_all_etf_scores, select_v8,
-    compute_metrics, compute_spy_buyhold,
-)
+    print("Datos descargados.")
 
 
 class TradingBotV8:
@@ -77,6 +80,7 @@ class TradingBotV8:
         self.log_path = os.path.join(ROOT, "results", "live_log_v8.txt")
         self.state_path = os.path.join(ROOT, "results", "live_state_v8.json")
         os.makedirs(os.path.dirname(self.log_path), exist_ok=True)
+        os.makedirs(os.path.join(ROOT, "results"), exist_ok=True)
         self.last_rebalance = None
         self.state = self._load_state()
 
@@ -117,31 +121,48 @@ class TradingBotV8:
 
     def run_rebalance(self):
         """Ejecuta rebalanceo mensual completo."""
+        download_universe_data()
         self.log("=" * 60)
         self.log("REBALANCEO MENSUAL - Bot v8")
         self.log("=" * 60)
 
         self.log("Cargando features macro (VIX, FedFunds, yield curve)...")
-        features = load_macro_features()
-        if not features.empty:
-            last_feat = features.iloc[-1]
-            self.log(f"  VIX={last_feat.get('vix', 'n/a')}, "
-                     f"FedFunds={last_feat.get('fed_funds', 'n/a')}, "
-                     f"yield_spread={last_feat.get('yield_spread', 'n/a')}")
+        try:
+            features = load_macro_features()
+            if not features.empty:
+                last_feat = features.iloc[-1]
+                self.log(f"  VIX={last_feat.get('vix', 'n/a')}, "
+                         f"FedFunds={last_feat.get('fed_funds', 'n/a')}, "
+                         f"yield_spread={last_feat.get('yield_spread', 'n/a')}")
+        except Exception as e:
+            self.log(f"ERROR cargando features macro: {e}")
+            features = pd.DataFrame()
 
         self.log("Calculando momentum multi-lookback...")
-        mom_df = build_momentum_table(UNIVERSE_V8)
-        if mom_df.empty:
-            self.log("ERROR: sin datos de momentum")
+        try:
+            mom_df = build_momentum_table(UNIVERSE_V8)
+            if mom_df.empty:
+                self.log("ERROR: sin datos de momentum")
+                return
+        except Exception as e:
+            self.log(f"ERROR calculando momentum: {e}")
             return
 
         self.log("Cargando scores fundamentales (agentes hedge fund)...")
-        etf_scores = get_all_etf_scores()
+        try:
+            etf_scores = get_all_etf_scores()
+        except Exception as e:
+            self.log(f"ERROR cargando scores fundamentales: {e}")
+            etf_scores = {}
 
         self.log("Seleccionando top-3 con regime-aware...")
-        weights, selections, cash_months = select_v8(mom_df, features, etf_scores)
-        if not selections:
-            self.log("ERROR: sin selecciones")
+        try:
+            weights, selections, cash_months = select_v8(mom_df, features, etf_scores)
+            if not selections:
+                self.log("ERROR: sin selecciones")
+                return
+        except Exception as e:
+            self.log(f"ERROR en seleccion: {e}")
             return
 
         last_selection = selections[-1]
@@ -190,7 +211,7 @@ class TradingBotV8:
         self.log(f"Total portfolio: ${cash:.2f} (cash: ${cash_remaining:.2f}, invertido: ${cash - cash_remaining:.2f})")
 
     def daily_check(self):
-        """Chequeo diario: actualizar precios, P&L, detectar anomalies."""
+        """Chequeo diario: actualizar precios, P&L."""
         positions = self.state.get("positions", {})
         if not positions:
             return
