@@ -83,7 +83,7 @@ jobs:
         continue-on-error: true
         run: |
           cd trading_bot
-          python -m bot.main --rebalance 2>&1 | tee ../live_run.log
+          python -m bot.main --once 2>&1 | tee ../live_run.log
 
       - name: DEBUG - Verificar estado del bot
         run: |
