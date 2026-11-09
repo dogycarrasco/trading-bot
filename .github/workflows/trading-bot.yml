@@ -84,7 +84,31 @@ jobs:
         run: |
           cd trading_bot
           python -m bot.main --once 2>&1 | tee ../live_run.log
-
+      - name: Generar tearsheet QuantStats (semanal)
+        if: github.event_name == 'schedule'
+        continue-on-error: true
+        run: |
+          cd trading_bot
+          python -c "
+          import quantstats as qs
+          import pandas as pd
+          import json
+          try:
+              with open('results/live_state_v8.json') as f:
+                  state = json.load(f)
+              snapshots = state.get('daily_snapshots', [])
+              if len(snapshots) > 5:
+                  values = [s.get('total_value', 500) for s in snapshots]
+                  dates = pd.to_datetime([s.get('date') for s in snapshots])
+                  equity = pd.Series(values, index=dates)
+                  returns = equity.pct_change().dropna()
+                  qs.reports.html(returns, output='results/tearsheet.html', title='Bot v10 Live', download_images=True)
+                  print('Tearsheet generado OK')
+              else:
+                  print('Sin suficientes snapshots para tearsheet')
+          except Exception as e:
+              print(f'Error tearsheet: {e}')
+          "
       - name: DEBUG - Verificar estado del bot
         run: |
           echo "=== Existe live_state_v8.json? ==="
