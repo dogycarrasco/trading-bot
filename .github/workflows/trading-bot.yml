@@ -85,6 +85,18 @@ jobs:
           cd trading_bot
           python -m bot.main --once 2>&1 | tee ../live_run.log
 
+      - name: Asegurar que existe estado (fallback)
+        run: |
+          mkdir -p trading_bot/results
+          if [ ! -f trading_bot/results/live_state_v8.json ]; then
+            echo '{"cash":500.0,"positions":{},"history":[],"last_rebalance":null}' > trading_bot/results/live_state_v8.json
+            echo "ESTADO FALLBACK CREADO" > trading_bot/results/live_log_v8.txt
+          fi
+          if [ ! -f trading_bot/results/live_log_v8.txt ]; then
+            echo "Sin log disponible" > trading_bot/results/live_log_v8.txt
+          fi
+          cp live_run.log trading_bot/results/live_log_v8.txt 2>/dev/null || true
+
       - name: Generar tearsheet QuantStats
         continue-on-error: true
         run: |
@@ -109,18 +121,6 @@ jobs:
           except Exception as e:
               print(f'Error tearsheet: {e}')
           "
-
-      - name: Asegurar que existe estado (fallback)
-        run: |
-          mkdir -p trading_bot/results
-          if [ ! -f trading_bot/results/live_state_v8.json ]; then
-            echo '{"cash":500.0,"positions":{},"history":[],"last_rebalance":null}' > trading_bot/results/live_state_v8.json
-            echo "ESTADO FALLBACK CREADO" > trading_bot/results/live_log_v8.txt
-          fi
-          if [ ! -f trading_bot/results/live_log_v8.txt ]; then
-            echo "Sin log disponible" > trading_bot/results/live_log_v8.txt
-          fi
-          cp live_run.log trading_bot/results/live_log_v8.txt 2>/dev/null || true
 
       - name: Preparar sitio web
         run: |
