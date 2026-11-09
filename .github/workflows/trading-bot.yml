@@ -84,8 +84,8 @@ jobs:
         run: |
           cd trading_bot
           python -m bot.main --once 2>&1 | tee ../live_run.log
-      - name: Generar tearsheet QuantStats (semanal)
-        if: github.event_name == 'schedule'
+
+      - name: Generar tearsheet QuantStats
         continue-on-error: true
         run: |
           cd trading_bot
@@ -105,28 +105,12 @@ jobs:
                   qs.reports.html(returns, output='results/tearsheet.html', title='Bot v10 Live', download_images=True)
                   print('Tearsheet generado OK')
               else:
-                  print('Sin suficientes snapshots para tearsheet')
+                  print('Sin suficientes snapshots para tearsheet aun')
           except Exception as e:
               print(f'Error tearsheet: {e}')
           "
-      - name: DEBUG - Verificar estado del bot
-        run: |
-          echo "=== Existe live_state_v8.json? ==="
-          ls -la trading_bot/results/live_state_v8.json 2>/dev/null || echo "NO EXISTE"
-          echo ""
-          echo "=== Contenido del JSON ==="
-          cat trading_bot/results/live_state_v8.json 2>/dev/null || echo "ARCHIVO NO ENCONTRADO"
-          echo ""
-          echo "=== Existe live_log_v8.txt? ==="
-          ls -la trading_bot/results/live_log_v8.txt 2>/dev/null || echo "NO EXISTE"
-          echo ""
-          echo "=== Ultimas 10 lineas del log ==="
-          tail -10 trading_bot/results/live_log_v8.txt 2>/dev/null || echo "LOG NO ENCONTRADO"
-          echo ""
-          echo "=== Contenido de live_run.log ==="
-          cat live_run.log 2>/dev/null || echo "live_run.log NO ENCONTRADO"
 
-      - name: Asegurar que existe estado (fallback)
+      - name: Asegurar que existe estado (fallback si bot fallo)
         run: |
           mkdir -p trading_bot/results
           if [ ! -f trading_bot/results/live_state_v8.json ]; then
@@ -144,6 +128,7 @@ jobs:
           cp trading_bot/docs/dashboard.html _site/index.html
           cp trading_bot/results/live_state_v8.json _site/live_state_v8.json
           cp trading_bot/results/live_log_v8.txt _site/live_log_v8.txt
+          cp trading_bot/results/tearsheet.html _site/tearsheet.html 2>/dev/null || echo "Sin tearsheet"
 
       - name: Subir artifact de Pages
         uses: actions/upload-pages-artifact@v3
