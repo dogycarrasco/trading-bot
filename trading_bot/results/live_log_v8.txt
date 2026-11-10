@@ -1,10 +1,15 @@
-Traceback (most recent call last):
-  File "<frozen runpy>", line 189, in _run_module_as_main
-  File "<frozen runpy>", line 159, in _get_module_details
-  File "<frozen importlib._bootstrap_external>", line 1133, in get_code
-  File "<frozen importlib._bootstrap_external>", line 1063, in source_to_code
-  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
-  File "/home/runner/work/trading-bot/trading-bot/trading_bot/bot/main.py", line 22
-    from features.options_hedge import (
-    ^^^^
-SyntaxError: invalid syntax
+[2026-11-10 02:17:40 UTC] Modo: PAPER TRADING SIMULADO
+[2026-11-10 02:17:40 UTC] Capital inicial: $0.00
+[2026-11-10 02:17:40 UTC] Posiciones actuales: ['XLV', 'XLP', 'USO']
+[2026-11-10 02:17:40 UTC] ============================================================
+[2026-11-10 02:17:40 UTC] Ciclo bot v11
+[2026-11-10 02:17:40 UTC] ============================================================
+[2026-11-10 02:17:40 UTC] Actualizando precios (dejando crecer)...
+[2026-11-10 02:17:40 UTC]   XLV: $184.80 x 0.901876 = $166.67 (P&L +0.00, +0.00%)
+[2026-11-10 02:17:40 UTC]   XLP: $90.08 x 1.850207 = $166.67 (P&L +0.00, +0.00%)
+[2026-11-10 02:17:40 UTC]   USO: $148.41 x 1.123015 = $166.67 (P&L +0.00, +0.00%)
+[2026-11-10 02:17:40 UTC] Total: $500.00 (P&L -0.00, -0.00%)
+
+Cargando features macro...
+[2026-11-10 02:17:40 UTC] Market Score: +15 (NEUTRAL) -> 70% eq / 25% cash / 5% hedge
+[2026-11-10 02:17:40 UTC] Ciclo completado
