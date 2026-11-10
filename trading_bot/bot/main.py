@@ -264,7 +264,10 @@ class TradingBotV8:
 
         # Guardar posiciones actualizadas
         self.state["positions"] = updated_positions
-
+from features.options_hedge import (
+    compute_market_score, score_to_regime, score_to_allocation,
+    OptionsHedgeManager, black_scholes_put,
+)
         total_pnl = total_value - 500
         total_pnl_pct = (total_pnl / 500) * 100
         self.log(f"Total: ${total_value:.2f} (P&L {total_pnl:+.2f}, {total_pnl_pct:+.2f}%)")
@@ -283,7 +286,59 @@ class TradingBotV8:
         self.state["daily_snapshots"].append(snapshot)
         if len(self.state["daily_snapshots"]) > 90:
             self.state["daily_snapshots"] = self.state["daily_snapshots"][-90:]
+        # === v11: MARKET SCORE + HEDGE ===
+        try:
+            features = load_macro_features()
+            if not features.empty:
+                last_feat = features.iloc[-1]
+                vix_val = last_feat.get("vix", 25)
+                fg_val = last_feat.get("fear_greed", 50)
+                ff_val = last_feat.get("fed_funds", 4.5)
+                yinv = bool(last_feat.get("yield_inverted", 0))
+            else:
+                vix_val, fg_val, ff_val, yinv = 25, 50, 4.5, False
 
+            spy_df = load_tv_data("SPY", "AMEX")
+            spy_above = True
+            spy_price = 500.0
+            spy_mom = 0
+            if not spy_df.empty:
+                spy_price = float(spy_df["close"].iloc[-1])
+                spy_above = spy_price > float(spy_df["close"].rolling(200).mean().iloc[-1])
+                spy_mom = float(spy_df["close"].pct_change(20).iloc[-1] * 100) if len(spy_df) > 20 else 0
+
+            score = compute_market_score(vix_val, fg_val, spy_above, yinv, ff_val, spy_mom, spy_mom * 2)
+            regime = score_to_regime(score)
+            eq_pct, cash_pct, hedge_pct = score_to_allocation(score)
+
+            self.log(f"Market Score: {score:+.0f} ({regime}) -> {eq_pct*100:.0f}% eq / {cash_pct*100:.0f}% cash / {hedge_pct*100:.0f}% hedge")
+
+            # Hedging: si score < -20, comprar puts
+            if score < -20 and len(self.hedge_manager.positions) == 0:
+                hedge_budget = total_value * hedge_pct
+                put_price = black_scholes_put(spy_price, spy_price * 0.95, 30/365, 0.045, vix_val / 100)
+                if put_price > 0:
+                    n_contracts = max(1, int(hedge_budget / (put_price * 100)))
+                    pos = self.hedge_manager.buy_put(spy_price, vix_val, quantity=n_contracts)
+                    self.log(f"  HEDGE: Comprados {n_contracts} puts SPY strike ${pos['strike']:.2f} @ ${put_price:.2f} (costo ${pos['cost']:.2f})")
+
+            # Actualizar puts existentes
+            if self.hedge_manager.positions:
+                self.hedge_manager.update_positions(spy_price, vix_val)
+                hs = self.hedge_manager.get_summary()
+                self.log(f"  HEDGE: {hs['open_positions']} puts abiertos, valor ${hs['current_value']:.2f}, P&L ${hs['pnl']:.2f}")
+
+            # Si score > 0, cerrar hedges
+            if score > 0 and self.hedge_manager.positions:
+                self.hedge_manager.close_all(spy_price, vix_val)
+                self.log(f"  HEDGE: Cerrados todos los puts (mercado se recupero)")
+
+            # Guardar hedge en estado
+            self.state["market_score"] = score
+            self.state["market_regime"] = regime
+            self.state["hedge_summary"] = self.hedge_manager.get_summary()
+        except Exception as e:
+            self.log(f"  HEDGE: error {e}")
         self._save_state()
 
     def run_cycle(self):
