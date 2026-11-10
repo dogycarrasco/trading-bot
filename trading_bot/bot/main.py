@@ -157,8 +157,19 @@ class TradingBotV8:
             etf_scores = {}
 
         self.log("Seleccionando top-3...")
+                # Leer config optimizada (bucle de automejora)
+        opt_config_path = os.path.join(ROOT, "results", "optimized_config.json")
+        opt_config = {}
+        if os.path.exists(opt_config_path):
+            try:
+                with open(opt_config_path) as f:
+                    opt_config = json.load(f)
+                self.log(f"Usando config optimizada: {opt_config}")
+            except Exception:
+                pass
+
         try:
-            weights, selections, cash_months = select_v8(mom_df, features, etf_scores)
+            weights, selections, cash_months = select_v8(mom_df, features, etf_scores, **opt_config)
             if not selections:
                 self.log("ERROR: sin selecciones")
                 return
