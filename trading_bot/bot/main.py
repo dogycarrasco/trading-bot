@@ -19,7 +19,10 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 
 from backtest.run_v8_hedge_fund import (
-    UNIVERSE_V8, load_tv_data, load_macro_features,
+from features.options_hedge import (
+    compute_market_score, score_to_regime, score_to_allocation,
+    OptionsHedgeManager, black_scholes_put,
+)    UNIVERSE_V8, load_tv_data, load_macro_features,
     build_momentum_table, get_all_etf_scores, select_v8,
     compute_metrics, compute_spy_buyhold,
 )
