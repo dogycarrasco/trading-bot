@@ -1,43 +1,10 @@
-you are using nologin method, data you access may be limited
-[2026-11-10 00:31:12 UTC] Modo: PAPER TRADING SIMULADO
-[2026-11-10 00:31:12 UTC] Capital inicial: $500.00
-[2026-11-10 00:31:12 UTC] Posiciones actuales: []
-[2026-11-10 00:31:12 UTC] ============================================================
-[2026-11-10 00:31:12 UTC] Ciclo bot v8
-[2026-11-10 00:31:12 UTC] ============================================================
-[2026-11-10 00:31:12 UTC] Sin posiciones - invirtiendo automaticamente...
-Descargando datos frescos de TradingView...
-Datos descargados.
-[2026-11-10 00:31:12 UTC] ============================================================
-[2026-11-10 00:31:12 UTC] REBALANCEO - Bot v8
-[2026-11-10 00:31:12 UTC] ============================================================
-[2026-11-10 00:31:12 UTC] Cargando features macro...
-
-Cargando features macro...
-[2026-11-10 00:31:12 UTC]   VIX=25.64
-[2026-11-10 00:31:12 UTC] Calculando momentum...
-
-Construyendo tabla de momentum para 18 activos...
-[2026-11-10 00:31:12 UTC] Cargando scores fundamentales...
-
-Calculando scores fundamentales de ETFs...
-  SPY   : score=+0.017
-  QQQ   : score=+0.016
-  XLK   : score=-0.012
-  XLF   : score=-0.014
-  XLE   : score=-0.054
-  XLV   : score=-0.057
-  XLY   : score=-0.035
-  XLP   : score=-0.048
-  XLI   : score=-0.026
-  XLU   : score=-0.057
-[2026-11-10 00:31:12 UTC] Seleccionando top-3...
-[2026-11-10 00:31:12 UTC] Usando config optimizada: {'max_crypto_weight': 0.15, 'max_single_asset': 0.4, 'bubble_threshold': 60.0, 'bubble_penalty': 0.5}
-[2026-11-10 00:31:12 UTC] Regimen: NORMAL
-[2026-11-10 00:31:12 UTC] Cash %: 0.0%
-[2026-11-10 00:31:12 UTC] Seleccionados: ['XLV', 'XLP', 'USO']
-[2026-11-10 00:31:12 UTC]   >>> XLV: qty=0.901876 @ $184.80 = $166.67
-[2026-11-10 00:31:12 UTC]   >>> XLP: qty=1.850207 @ $90.08 = $166.67
-[2026-11-10 00:31:12 UTC]   >>> USO: qty=1.123015 @ $148.41 = $166.67
-[2026-11-10 00:31:12 UTC] Estado guardado. Total: $500.00
-[2026-11-10 00:31:12 UTC] Ciclo completado
+Traceback (most recent call last):
+  File "<frozen runpy>", line 189, in _run_module_as_main
+  File "<frozen runpy>", line 159, in _get_module_details
+  File "<frozen importlib._bootstrap_external>", line 1133, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1063, in source_to_code
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/home/runner/work/trading-bot/trading-bot/trading_bot/bot/main.py", line 22
+    from features.options_hedge import (
+    ^^^^
+SyntaxError: invalid syntax
