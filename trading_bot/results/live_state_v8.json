@@ -1,1 +1,37 @@
-{"cash":500.0,"positions":{},"history":[],"last_rebalance":null}
+{
+  "cash": 0.0,
+  "positions": {
+    "XLV": {
+      "qty": 0.9018759018759017,
+      "entry_price": 184.8,
+      "value": 166.66666666666666,
+      "weight": 0.3333333333333333
+    },
+    "XLP": {
+      "qty": 1.8502072232089994,
+      "entry_price": 90.08,
+      "value": 166.66666666666666,
+      "weight": 0.3333333333333333
+    },
+    "USO": {
+      "qty": 1.1230150708622508,
+      "entry_price": 148.41,
+      "value": 166.66666666666666,
+      "weight": 0.3333333333333333
+    }
+  },
+  "history": [
+    {
+      "date": "2026-11-10T00:31:12.789327+00:00",
+      "regime": "NORMAL",
+      "selected": [
+        "XLV",
+        "XLP",
+        "USO"
+      ],
+      "cash_pct": 0.0,
+      "total_value": 500.0
+    }
+  ],
+  "last_rebalance": "2026-11-10T00:31:12.789316+00:00"
+}
