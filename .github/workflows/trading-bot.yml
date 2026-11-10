@@ -67,7 +67,7 @@ jobs:
           os.makedirs('data/tv_cache', exist_ok=True)
           for sym, exch in universe:
               path = f'data/tv_cache/{sym}_{exch}.csv'
-              if not os.path.exists(path):
+              if True:
                   try:
                       df = tv.get_hist(symbol=sym, exchange=exch, interval=Interval.in_daily, n_bars=5000)
                       if df is not None and len(df) > 0:
