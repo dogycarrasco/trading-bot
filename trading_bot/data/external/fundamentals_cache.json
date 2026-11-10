@@ -1,0 +1,74 @@
+{
+  "SPY": {
+    "final_score": 0.017,
+    "n_holdings_analyzed": 7
+  },
+  "QQQ": {
+    "final_score": 0.016,
+    "n_holdings_analyzed": 7
+  },
+  "XLK": {
+    "final_score": -0.012,
+    "n_holdings_analyzed": 7
+  },
+  "XLF": {
+    "final_score": -0.014,
+    "n_holdings_analyzed": 7
+  },
+  "XLE": {
+    "final_score": -0.054,
+    "n_holdings_analyzed": 7
+  },
+  "XLV": {
+    "final_score": -0.057,
+    "n_holdings_analyzed": 7
+  },
+  "XLY": {
+    "final_score": -0.035,
+    "n_holdings_analyzed": 7
+  },
+  "XLP": {
+    "final_score": -0.048,
+    "n_holdings_analyzed": 7
+  },
+  "XLI": {
+    "final_score": -0.026,
+    "n_holdings_analyzed": 7
+  },
+  "XLU": {
+    "final_score": -0.057,
+    "n_holdings_analyzed": 7
+  },
+  "GLD": {
+    "final_score": 0,
+    "note": "no fundamental data"
+  },
+  "USO": {
+    "final_score": 0,
+    "note": "no fundamental data"
+  },
+  "BTCUSD": {
+    "final_score": 0,
+    "note": "no fundamental data"
+  },
+  "ETHUSD": {
+    "final_score": 0,
+    "note": "no fundamental data"
+  },
+  "SOLUSD": {
+    "final_score": 0,
+    "note": "no fundamental data"
+  },
+  "BNBUSD": {
+    "final_score": 0,
+    "note": "no fundamental data"
+  },
+  "XRPUSD": {
+    "final_score": 0,
+    "note": "no fundamental data"
+  },
+  "ADAUSD": {
+    "final_score": 0,
+    "note": "no fundamental data"
+  }
+}

@@ -1,0 +1,37 @@
+you are using nologin method, data you access may be limited
+[2026-11-10 00:23:50 UTC] Modo: PAPER TRADING SIMULADO
+[2026-11-10 00:23:50 UTC] Capital inicial: $500.00
+[2026-11-10 00:23:50 UTC] Posiciones actuales: []
+[2026-11-10 00:23:50 UTC] ============================================================
+[2026-11-10 00:23:50 UTC] Ciclo bot v8
+[2026-11-10 00:23:50 UTC] ============================================================
+[2026-11-10 00:23:50 UTC] Sin posiciones - invirtiendo automaticamente...
+Descargando datos frescos de TradingView...
+Datos descargados.
+[2026-11-10 00:23:50 UTC] ============================================================
+[2026-11-10 00:23:50 UTC] REBALANCEO - Bot v8
+[2026-11-10 00:23:50 UTC] ============================================================
+[2026-11-10 00:23:50 UTC] Cargando features macro...
+
+Cargando features macro...
+[2026-11-10 00:23:50 UTC]   VIX=25.64
+[2026-11-10 00:23:50 UTC] Calculando momentum...
+
+Construyendo tabla de momentum para 18 activos...
+[2026-11-10 00:23:50 UTC] Cargando scores fundamentales...
+
+Calculando scores fundamentales de ETFs...
+  SPY   : score=+0.017
+  QQQ   : score=+0.016
+  XLK   : score=-0.012
+  XLF   : score=-0.014
+  XLE   : score=-0.054
+  XLV   : score=-0.057
+  XLY   : score=-0.035
+  XLP   : score=-0.048
+  XLI   : score=-0.026
+  XLU   : score=-0.057
+[2026-11-10 00:23:50 UTC] Seleccionando top-3...
+[2026-11-10 00:23:50 UTC] Usando config optimizada: {'max_crypto_weight': 0.15, 'max_single_asset': 0.4, 'bubble_threshold': 60.0, 'bubble_penalty': 0.5, 'stop_loss_threshold': -0.05, 'top_n_base': 3}
+[2026-11-10 00:23:50 UTC] ERROR en seleccion: select_v8() got an unexpected keyword argument 'stop_loss_threshold'
+[2026-11-10 00:23:50 UTC] Ciclo completado
