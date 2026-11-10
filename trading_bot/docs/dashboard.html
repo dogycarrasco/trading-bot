@@ -147,17 +147,18 @@
       if (Object.keys(positions).length === 0) {
         posBody.innerHTML = '<tr><td colspan="8" class="loading">Sin posiciones (100% cash)</td></tr>';
       } else {
-        posBody.innerHTML = Object.entries(positions).map(([sym, p]) => {
-          const pnlPos = (p.entry_price - p.entry_price) * p.qty;
-          const pnlPctPos = 0;
+                posBody.innerHTML = Object.entries(positions).map(([sym, p]) => {
+          var curPrice = p.current_price || p.entry_price;
+          var pnlPos = (curPrice - p.entry_price) * p.qty;
+          var pnlPctPos = p.entry_price > 0 ? ((curPrice / p.entry_price) - 1) * 100 : 0;
           return '<tr>' +
             '<td><strong>' + sym + '</strong></td>' +
             '<td>' + p.qty.toFixed(6) + '</td>' +
             '<td>$' + p.entry_price.toFixed(2) + '</td>' +
-            '<td>$' + p.entry_price.toFixed(2) + '</td>' +
+            '<td>$' + curPrice.toFixed(2) + '</td>' +
             '<td>' + fmtMoney(p.value) + '</td>' +
-            '<td class="pos">' + fmtMoney(0) + '</td>' +
-            '<td class="pos">' + fmtPct(0) + '</td>' +
+            '<td class="' + (pnlPos >= 0 ? 'pos' : 'neg') + '">' + fmtMoney(pnlPos) + '</td>' +
+            '<td class="' + (pnlPctPos >= 0 ? 'pos' : 'neg') + '">' + fmtPct(pnlPctPos) + '</td>' +
             '<td>' + (p.weight * 100).toFixed(1) + '%</td>' +
           '</tr>';
         }).join('');
