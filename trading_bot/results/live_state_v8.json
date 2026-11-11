@@ -4,22 +4,22 @@
     "XLV": {
       "qty": 0.9018759018759017,
       "entry_price": 184.8,
-      "value": 166.66666666666666,
-      "current_price": 184.8,
+      "value": 170.3463203463203,
+      "current_price": 188.88,
       "weight": 0.3333333333333333
     },
     "XLP": {
       "qty": 1.8502072232089994,
       "entry_price": 90.08,
-      "value": 166.66666666666666,
-      "current_price": 90.08,
+      "value": 168.42436352871522,
+      "current_price": 91.03,
       "weight": 0.3333333333333333
     },
     "USO": {
       "qty": 1.1230150708622508,
       "entry_price": 148.41,
-      "value": 166.66666666666663,
-      "current_price": 148.41,
+      "value": 158.85048177346536,
+      "current_price": 141.45,
       "weight": 0.3333333333333333
     }
   },
@@ -37,8 +37,8 @@
     }
   ],
   "last_rebalance": "2026-11-10T00:31:12.789316+00:00",
-  "market_score": 15,
-  "market_regime": "NEUTRAL",
+  "market_score": 40,
+  "market_regime": "BULL",
   "hedge_summary": {
     "open_positions": 0,
     "total_cost": 0,
@@ -71,6 +71,14 @@
       "positions_count": 3,
       "pnl": -5.684341886080802e-14,
       "pnl_pct": -1.1368683772161604e-14
+    },
+    {
+      "date": "2026-11-11T01:51:17.705248+00:00",
+      "total_value": 497.6211656485009,
+      "cash": 0.0,
+      "positions_count": 3,
+      "pnl": -2.3788343514991084,
+      "pnl_pct": -0.4757668702998217
     }
   ]
 }
