@@ -1,10 +1,3 @@
-"""
-Orquestador live paper trading - Bot v11.
-
-v9: Anti-drawdown (stop-loss + crypto winter + smart money)
-v10: QuantStats + Trade Memory + Bucle de automejora
-v11: Options Hedging (Black-Scholes) + Market Trend Score
-"""
 import os
 import sys
 import time
@@ -34,7 +27,7 @@ def download_universe_data():
         from tvDatafeed import TvDatafeed, Interval
     except ImportError:
         return
-    print("Descargando datos frescos de TradingView...")
+    print("Descargando datos frescos...")
     try:
         tv = TvDatafeed()
     except Exception:
@@ -51,7 +44,7 @@ def download_universe_data():
             except Exception:
                 pass
     vix_path = os.path.join(ROOT, "data", "tv_cache", "VIX_CBOE.csv")
-    if not os.path.exists(vix_path):
+    if True:
         try:
             df = tv.get_hist(symbol="VIX", exchange="CBOE", interval=Interval.in_daily, n_bars=5000)
             if df is not None and len(df) > 0:
@@ -62,7 +55,6 @@ def download_universe_data():
 
 
 class TradingBotV8:
-    """Bot v11 para paper trading live con hedge + market score."""
 
     def __init__(self, config_path=None):
         if config_path is None:
@@ -134,7 +126,6 @@ class TradingBotV8:
         self.log("=" * 60)
         self.log("REBALANCEO - Bot v11")
         self.log("=" * 60)
-
         self.log("Cargando features macro...")
         try:
             features = load_macro_features()
@@ -144,7 +135,6 @@ class TradingBotV8:
         except Exception as e:
             self.log(f"ERROR cargando features macro: {e}")
             features = pd.DataFrame()
-
         self.log("Calculando momentum...")
         try:
             mom_df = build_momentum_table(UNIVERSE_V8)
@@ -154,15 +144,12 @@ class TradingBotV8:
         except Exception as e:
             self.log(f"ERROR calculando momentum: {e}")
             return
-
         self.log("Cargando scores fundamentales...")
         try:
             etf_scores = get_all_etf_scores()
         except Exception as e:
             self.log(f"ERROR scores fundamentales: {e}")
             etf_scores = {}
-
-        # Leer config optimizada (bucle de automejora)
         opt_config_path = os.path.join(ROOT, "results", "optimized_config.json")
         opt_config = {}
         if os.path.exists(opt_config_path):
@@ -172,7 +159,6 @@ class TradingBotV8:
                 self.log(f"Usando config optimizada: {opt_config}")
             except Exception:
                 pass
-
         self.log("Seleccionando top-3...")
         try:
             weights, selections, cash_months = select_v8(mom_df, features, etf_scores, **opt_config)
@@ -182,20 +168,16 @@ class TradingBotV8:
         except Exception as e:
             self.log(f"ERROR en seleccion: {e}")
             return
-
         last_selection = selections[-1]
         self.log(f"Regimen: {last_selection.get('regime', 'NORMAL')}")
         self.log(f"Cash %: {last_selection.get('cash_pct', 0)*100:.1f}%")
         self.log(f"Seleccionados: {last_selection.get('selected', [])}")
-
         cash = self.state.get("cash", 500.0)
         current_positions = self.state.get("positions", {})
         current_value = sum(p.get("value", 0) for p in current_positions.values())
         total_capital = cash + current_value
-
         cash_pct = last_selection.get("cash_pct", 0)
         investable = total_capital * (1 - cash_pct)
-
         new_positions = {}
         if "weights" in last_selection:
             for asset, w in last_selection["weights"].items():
@@ -212,7 +194,6 @@ class TradingBotV8:
                             "weight": w,
                         }
                         self.log(f"  >>> {asset}: qty={qty:.6f} @ ${price:.2f} = ${target_value:.2f}")
-
         cash_remaining = total_capital - sum(p["value"] for p in new_positions.values())
         self.state["positions"] = new_positions
         self.state["cash"] = cash_remaining
@@ -224,7 +205,6 @@ class TradingBotV8:
             "cash_pct": cash_pct,
             "total_value": total_capital,
         })
-
         self._save_state()
         self.log(f"Estado guardado. Total: ${total_capital:.2f}")
 
@@ -235,11 +215,9 @@ class TradingBotV8:
         if not positions:
             self.log("Sin posiciones. Total: $500.00 (cash)")
             return
-
-       cash = self.state.get("cash", 0)
-       total_value = cash
-       updated_positions = {}
-
+        cash = self.state.get("cash", 0)
+        total_value = cash
+        updated_positions = {}
         for asset, pos in positions.items():
             df = load_tv_data(asset, "")
             if not df.empty:
@@ -261,13 +239,10 @@ class TradingBotV8:
             else:
                 updated_positions[asset] = pos
                 total_value += pos.get("value", 0)
-
         self.state["positions"] = updated_positions
         total_pnl = total_value - 500
         total_pnl_pct = (total_pnl / 500) * 100
         self.log(f"Total: ${total_value:.2f} (P&L {total_pnl:+.2f}, {total_pnl_pct:+.2f}%)")
-
-        # === v11: MARKET SCORE + HEDGE ===
         try:
             features = load_macro_features()
             if not features.empty:
@@ -278,7 +253,6 @@ class TradingBotV8:
                 yinv = bool(last_feat.get("yield_inverted", 0))
             else:
                 vix_val, fg_val, ff_val, yinv = 25, 50, 4.5, False
-
             spy_df = load_tv_data("SPY", "AMEX")
             spy_above = True
             spy_price = 500.0
@@ -288,14 +262,10 @@ class TradingBotV8:
                 ema200 = spy_df["close"].rolling(200).mean().iloc[-1]
                 spy_above = spy_price > float(ema200) if not pd.isna(ema200) else True
                 spy_mom = float(spy_df["close"].pct_change(20).iloc[-1] * 100) if len(spy_df) > 20 else 0
-
             score = compute_market_score(vix_val, fg_val, spy_above, yinv, ff_val, spy_mom, spy_mom * 2)
             regime = score_to_regime(score)
             eq_pct, cash_pct, hedge_pct = score_to_allocation(score)
-
             self.log(f"Market Score: {score:+.0f} ({regime}) -> {eq_pct*100:.0f}% eq / {cash_pct*100:.0f}% cash / {hedge_pct*100:.0f}% hedge")
-
-            # Hedging: si score < -20, comprar puts
             if score < -20 and len(self.hedge_manager.positions) == 0:
                 hedge_budget = total_value * hedge_pct
                 put_price = black_scholes_put(spy_price, spy_price * 0.95, 30/365, 0.045, vix_val / 100)
@@ -303,26 +273,18 @@ class TradingBotV8:
                     n_contracts = max(1, int(hedge_budget / (put_price * 100)))
                     pos = self.hedge_manager.buy_put(spy_price, vix_val, quantity=n_contracts)
                     self.log(f"  HEDGE: Comprados {n_contracts} puts SPY strike ${pos['strike']:.2f} @ ${put_price:.2f} (costo ${pos['cost']:.2f})")
-
-            # Actualizar puts existentes
             if self.hedge_manager.positions:
                 self.hedge_manager.update_positions(spy_price, vix_val)
                 hs = self.hedge_manager.get_summary()
                 self.log(f"  HEDGE: {hs['open_positions']} puts abiertos, valor ${hs['current_value']:.2f}, P&L ${hs['pnl']:.2f}")
-
-            # Si score > 0, cerrar hedges
             if score > 0 and self.hedge_manager.positions:
                 self.hedge_manager.close_all(spy_price, vix_val)
                 self.log(f"  HEDGE: Cerrados todos los puts (mercado se recupero)")
-
-            # Guardar hedge en estado
             self.state["market_score"] = score
             self.state["market_regime"] = regime
             self.state["hedge_summary"] = self.hedge_manager.get_summary()
         except Exception as e:
             self.log(f"  HEDGE: error {e}")
-
-        # Guardar snapshot diario
         snapshot = {
             "date": datetime.now(timezone.utc).isoformat(),
             "total_value": total_value,
@@ -336,14 +298,12 @@ class TradingBotV8:
         self.state["daily_snapshots"].append(snapshot)
         if len(self.state["daily_snapshots"]) > 90:
             self.state["daily_snapshots"] = self.state["daily_snapshots"][-90:]
-
         self._save_state()
 
     def run_cycle(self):
         self.log("=" * 60)
         self.log("Ciclo bot v11")
         self.log("=" * 60)
-
         if not self.has_positions():
             self.log("Sin posiciones - invirtiendo automaticamente...")
             self.run_rebalance()
@@ -353,18 +313,15 @@ class TradingBotV8:
         else:
             self.log("Actualizando precios (dejando crecer)...")
             self.daily_check()
-
         self.log("Ciclo completado")
 
     def run(self, interval_seconds=3600):
         self.running = True
         self.log(f"Bot v11 iniciado. Ctrl-C para parar.")
-
         def handle_sig(signum, frame):
             self.running = False
         sig_module.signal(sig_module.SIGINT, handle_sig)
         sig_module.signal(sig_module.SIGTERM, handle_sig)
-
         while self.running:
             try:
                 self.run_cycle()
@@ -376,7 +333,6 @@ class TradingBotV8:
             while slept < interval_seconds and self.running:
                 time.sleep(min(5, interval_seconds - slept))
                 slept += 5
-
         self.log("Bot detenido")
 
 
