@@ -1,15 +1,15 @@
-[2026-11-11 13:05:41 UTC] Modo: PAPER TRADING SIMULADO (sin broker real)
-[2026-11-11 13:05:41 UTC] Capital inicial: $0.00
-[2026-11-11 13:05:41 UTC] Posiciones actuales: 3
-[2026-11-11 13:05:41 UTC] ============================================================
-[2026-11-11 13:05:41 UTC] Ciclo bot v13 EVENT-DRIVEN
-[2026-11-11 13:05:41 UTC] ============================================================
-[2026-11-11 13:05:41 UTC] Paso 1/3: Actualizar precios de posiciones
-[2026-11-11 13:05:41 UTC]   XLV: $188.88 x 0.901876 = $170.35 (P&L $+3.68, +2.21%)
-[2026-11-11 13:05:41 UTC]   XLP: $91.03 x 1.850207 = $168.42 (P&L $+1.76, +1.05%)
-[2026-11-11 13:05:41 UTC]   USO: $141.45 x 1.123015 = $158.85 (P&L $-7.82, -4.69%)
-[2026-11-11 13:05:41 UTC] Paso 2/3: Verificar stops (stop-loss + trailing)
-[2026-11-11 13:05:41 UTC] Paso 3/3: Escanear oportunidades (find_setups)
-[2026-11-11 13:05:41 UTC]   Cash $0.00 < min $10. No se compra.
-[2026-11-11 13:05:41 UTC] Total portfolio value: $497.62 (cash $0.00, invertido $497.62)
-[2026-11-11 13:05:41 UTC] Ciclo completado
+[2026-11-11 14:46:39 UTC] Modo: PAPER TRADING SIMULADO (sin broker real)
+[2026-11-11 14:46:39 UTC] Capital inicial: $0.00
+[2026-11-11 14:46:39 UTC] Posiciones actuales: 3
+[2026-11-11 14:46:39 UTC] ============================================================
+[2026-11-11 14:46:39 UTC] Ciclo bot v13 EVENT-DRIVEN
+[2026-11-11 14:46:39 UTC] ============================================================
+[2026-11-11 14:46:39 UTC] Paso 1/3: Actualizar precios de posiciones
+[2026-11-11 14:46:39 UTC]   XLV: $187.66 x 0.901876 = $169.25 (P&L $+2.58, +1.55%)
+[2026-11-11 14:46:39 UTC]   XLP: $91.03 x 1.850207 = $168.42 (P&L $+1.76, +1.05%)
+[2026-11-11 14:46:39 UTC]   USO: $141.45 x 1.123015 = $158.85 (P&L $-7.82, -4.69%)
+[2026-11-11 14:46:39 UTC] Paso 2/3: Verificar stops (stop-loss + trailing)
+[2026-11-11 14:46:39 UTC] Paso 3/3: Escanear oportunidades (find_setups)
+[2026-11-11 14:46:39 UTC]   Cash $0.00 < min $10. No se compra.
+[2026-11-11 14:46:39 UTC] Total portfolio value: $496.52 (cash $0.00, invertido $496.52)
+[2026-11-11 14:46:39 UTC] Ciclo completado
