@@ -1,0 +1,74 @@
+﻿name: Auto-Mejora Semanal
+
+on:
+  schedule:
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Instalar dependencias
+        run: |
+          pip install --quiet -r trading_bot/requirements.txt
+          pip install --quiet git+https://github.com/rongardF/tvdatafeed.git
+          pip install --quiet yfinance
+
+      - name: Descargar datos
+        run: |
+          cd trading_bot
+          python -c "
+          from tvDatafeed import TvDatafeed, Interval
+          import os
+          tv = TvDatafeed()
+          universe = [
+              ('SPY','AMEX'),('QQQ','NASDAQ'),('XLK','AMEX'),('XLF','AMEX'),('XLE','AMEX'),
+              ('XLV','AMEX'),('XLY','AMEX'),('XLP','AMEX'),('XLI','AMEX'),('XLU','AMEX'),
+              ('GLD','AMEX'),('USO','AMEX'),
+              ('BTCUSD','BINANCE'),('ETHUSD','BINANCE'),('SOLUSD','BINANCE'),
+              ('BNBUSD','BINANCE'),('XRPUSD','BINANCE'),('ADAUSD','BINANCE'),
+              ('VIX','CBOE')
+          ]
+          os.makedirs('data/tv_cache', exist_ok=True)
+          for sym, exch in universe:
+              path = f'data/tv_cache/{sym}_{exch}.csv'
+              try:
+                  df = tv.get_hist(symbol=sym, exchange=exch, interval=Interval.in_daily, n_bars=5000)
+                  if df is not None and len(df) > 0:
+                      df.to_csv(path)
+                      print(f'{sym}: {len(df)} barras')
+              except Exception as e:
+                  print(f'{sym}: ERROR {e}')
+          "
+
+      - name: Correr grid search
+        run: |
+          cd trading_bot
+          python -m backtest.grid_search_optimize 2>&1 || echo "Grid search fallo"
+
+      - name: Guardar config optimizada
+        run: |
+          git config user.name "Auto-Mejora Bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add trading_bot/results/optimized_config.json 2>/dev/null || true
+          git add trading_bot/results/grid_search_report.json 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "Sin mejoras encontradas"
+          else
+            git commit -m "Auto-mejora: config optimizada actualizada"
+            git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:main || echo "Push fallido"
+          fi
