@@ -20,6 +20,7 @@ from features.options_hedge import (
     compute_market_score, score_to_regime, score_to_allocation,
     OptionsHedgeManager, black_scholes_put,
 )
+from models.ml_predictor import MLPredictor
 
 
 def download_universe_data():
@@ -74,6 +75,7 @@ class TradingBotV8:
         self.last_rebalance = None
         self.state = self._load_state()
         self.hedge_manager = OptionsHedgeManager()
+        self.ml_predictor = MLPredictor()
         self.stop_loss_pct = -0.05
         self.trailing_stop_trigger = 0.10
         self.trailing_stop_drop = -0.05
@@ -127,7 +129,7 @@ class TradingBotV8:
     def run_rebalance(self):
         download_universe_data()
         self.log("=" * 60)
-        self.log("REBALANCEO - Bot v11")
+        self.log("REBALANCEO - Bot v12")
         self.log("=" * 60)
         self.log("Cargando features macro...")
         try:
@@ -162,6 +164,20 @@ class TradingBotV8:
                 self.log(f"Usando config optimizada: {opt_config}")
             except Exception:
                 pass
+        
+        # === v12: ML PREDICTION ===
+        ml_pred = 0
+        ml_acc = 0
+        try:
+            self.log("Prediccion ML (LightGBM)...")
+            spy_df = load_tv_data("SPY", "AMEX")
+            if not spy_df.empty:
+                spy_features = self.ml_predictor.prepare_features(spy_df, features)
+                ml_pred, ml_acc = self.ml_predictor.train_predict(spy_features)
+                self.log(f"  ML prediccion: {ml_pred} (1=sube, 0=flat, -1=baja) - accuracy: {ml_acc:.1%}")
+        except Exception as e:
+            self.log(f"  ML error: {e}")
+
         self.log("Seleccionando top-3...")
         try:
             weights, selections, cash_months = select_v8(mom_df, features, etf_scores, **opt_config)
@@ -171,7 +187,15 @@ class TradingBotV8:
         except Exception as e:
             self.log(f"ERROR en seleccion: {e}")
             return
+        
+        # Si ML predice bajista (-1), reducir exposure
         last_selection = selections[-1]
+        if ml_pred == -1:
+            self.log("  ML predice BAJISTA - reduciendo exposure 50%")
+            last_selection["cash_pct"] = max(0.5, last_selection.get("cash_pct", 0))
+        elif ml_pred == 1 and last_selection.get("cash_pct", 0) < 0.3:
+            self.log("  ML predice ALCISTA - manteniendo exposure")
+        
         self.log(f"Regimen: {last_selection.get('regime', 'NORMAL')}")
         self.log(f"Cash %: {last_selection.get('cash_pct', 0)*100:.1f}%")
         self.log(f"Seleccionados: {last_selection.get('selected', [])}")
@@ -202,18 +226,20 @@ class TradingBotV8:
         self.state["positions"] = new_positions
         self.state["cash"] = cash_remaining
         self.state["last_rebalance"] = datetime.now(timezone.utc).isoformat()
+        self.state["ml_prediction"] = ml_pred
+        self.state["ml_accuracy"] = ml_acc
         self.state["history"].append({
             "date": datetime.now(timezone.utc).isoformat(),
             "regime": last_selection.get("regime"),
             "selected": last_selection.get("selected"),
             "cash_pct": cash_pct,
             "total_value": total_capital,
+            "ml_pred": ml_pred,
         })
         self._save_state()
         self.log(f"Estado guardado. Total: ${total_capital:.2f}")
 
     def daily_check(self):
-        """Actualiza precios, aplica stop-loss, trailing stop, market score y hedge."""
         download_universe_data()
         positions = self.state.get("positions", {})
         if not positions:
@@ -223,7 +249,6 @@ class TradingBotV8:
         total_value = cash
         updated_positions = {}
         positions_to_sell = []
-
         for asset, pos in positions.items():
             df = load_tv_data(asset, "")
             if not df.empty:
@@ -235,169 +260,8 @@ class TradingBotV8:
                 pnl = (current_price - entry_price) * qty
                 pnl_pct = ((current_price / entry_price) - 1) * 100 if entry_price > 0 else 0
                 total_value += value
-
-                # Actualizar peak price
                 if current_price > peak_price:
                     peak_price = current_price
-
-                # MEJORA 1: STOP-LOSS - vender si cae mas del 5%
                 if pnl_pct / 100 <= self.stop_loss_pct:
                     self.log(f"  STOP-LOSS {asset}: {pnl_pct:+.2f}% <= {self.stop_loss_pct*100:.0f}% - VENDIENDO")
-                    positions_to_sell.append((asset, qty, current_price, pnl, "STOP_LOSS"))
-                    continue
-
-                # MEJORA 2: TRAILING STOP - si subio >10% y luego cae >5% desde el peak
-                gain_from_entry = (peak_price / entry_price - 1) if entry_price > 0 else 0
-                drop_from_peak = (current_price / peak_price - 1) if peak_price > 0 else 0
-                if gain_from_entry >= self.trailing_stop_trigger and drop_from_peak <= self.trailing_stop_drop:
-                    self.log(f"  TRAILING STOP {asset}: subio {gain_from_entry*100:+.1f}%, cae {drop_from_peak*100:+.1f}% del peak - VENDIENDO")
-                    positions_to_sell.append((asset, qty, current_price, pnl, "TRAILING_STOP"))
-                    continue
-
-                updated_positions[asset] = {
-                    "qty": qty,
-                    "entry_price": entry_price,
-                    "value": value,
-                    "current_price": current_price,
-                    "weight": pos.get("weight", 0),
-                    "peak_price": peak_price,
-                }
-                self.log(f"  {asset}: ${current_price:.2f} x {qty:.6f} = ${value:.2f} (P&L {pnl:+.2f}, {pnl_pct:+.2f}%)")
-            else:
-                updated_positions[asset] = pos
-                total_value += pos.get("value", 0)
-
-        # MEJORA 1+2: Procesar ventas
-        if positions_to_sell:
-            for asset, qty, sell_price, pnl, reason in positions_to_sell:
-                cash += qty * sell_price
-                self.log(f"  >>> VENDIDO {asset} @ ${sell_price:.2f} (P&L {pnl:+.2f}) - {reason}")
-                # Guardar en trade memory
-                trade = {
-                    "symbol": asset,
-                    "exit_price": sell_price,
-                    "qty": qty,
-                    "pnl": pnl,
-                    "exit_reason": reason,
-                    "date": datetime.now(timezone.utc).isoformat(),
-                }
-                if "trade_history" not in self.state:
-                    self.state["trade_history"] = []
-                self.state["trade_history"].append(trade)
-
-        self.state["positions"] = updated_positions
-        self.state["cash"] = cash
-        total_pnl = total_value + sum(qty * price for _, qty, price, _, _ in positions_to_sell) - 500
-        total_pnl_pct = (total_pnl / 500) * 100
-        self.log(f"Total: ${total_value:.2f} (P&L {total_pnl:+.2f}, {total_pnl_pct:+.2f}%)")
-
-        # MEJORA 3: Si vendimos posiciones y tenemos cash, reinvertir
-        if positions_to_sell and cash > 50:
-            self.log(f"  REINVERTIR: ${cash:.2f} en cash disponible - rebalanceando...")
-            self.run_rebalance()
-            return
-
-        # MARKET SCORE + HEDGE
-        try:
-            features = load_macro_features()
-            if not features.empty:
-                last_feat = features.iloc[-1]
-                vix_val = last_feat.get("vix", 25)
-                fg_val = last_feat.get("fear_greed", 50)
-                ff_val = last_feat.get("fed_funds", 4.5)
-                yinv = bool(last_feat.get("yield_inverted", 0))
-            else:
-                vix_val, fg_val, ff_val, yinv = 25, 50, 4.5, False
-            spy_df = load_tv_data("SPY", "AMEX")
-            spy_above = True
-            spy_price = 500.0
-            spy_mom = 0
-            if not spy_df.empty:
-                spy_price = float(spy_df["close"].iloc[-1])
-                ema200 = spy_df["close"].rolling(200).mean().iloc[-1]
-                spy_above = spy_price > float(ema200) if not pd.isna(ema200) else True
-                spy_mom = float(spy_df["close"].pct_change(20).iloc[-1] * 100) if len(spy_df) > 20 else 0
-            score = compute_market_score(vix_val, fg_val, spy_above, yinv, ff_val, spy_mom, spy_mom * 2)
-            regime = score_to_regime(score)
-            eq_pct, cash_pct, hedge_pct = score_to_allocation(score)
-            self.log(f"Market Score: {score:+.0f} ({regime}) -> {eq_pct*100:.0f}% eq / {cash_pct*100:.0f}% cash / {hedge_pct*100:.0f}% hedge")
-            if score < -20 and len(self.hedge_manager.positions) == 0:
-                hedge_budget = total_value * hedge_pct
-                put_price = black_scholes_put(spy_price, spy_price * 0.95, 30/365, 0.045, vix_val / 100)
-                if put_price > 0:
-                    n_contracts = max(1, int(hedge_budget / (put_price * 100)))
-                    pos = self.hedge_manager.buy_put(spy_price, vix_val, quantity=n_contracts)
-                    self.log(f"  HEDGE: Comprados {n_contracts} puts SPY strike ${pos['strike']:.2f} @ ${put_price:.2f}")
-            if self.hedge_manager.positions:
-                self.hedge_manager.update_positions(spy_price, vix_val)
-                hs = self.hedge_manager.get_summary()
-                self.log(f"  HEDGE: {hs['open_positions']} puts, valor ${hs['current_value']:.2f}, P&L ${hs['pnl']:.2f}")
-            if score > 0 and self.hedge_manager.positions:
-                self.hedge_manager.close_all(spy_price, vix_val)
-                self.log(f"  HEDGE: Cerrados todos los puts")
-            self.state["market_score"] = score
-            self.state["market_regime"] = regime
-            self.state["hedge_summary"] = self.hedge_manager.get_summary()
-        except Exception as e:
-            self.log(f"  HEDGE: error {e}")
-
-        snapshot = {
-            "date": datetime.now(timezone.utc).isoformat(),
-            "total_value": total_value,
-            "cash": cash,
-            "positions_count": len(updated_positions),
-            "pnl": total_pnl,
-            "pnl_pct": total_pnl_pct,
-        }
-        if "daily_snapshots" not in self.state:
-            self.state["daily_snapshots"] = []
-        self.state["daily_snapshots"].append(snapshot)
-        if len(self.state["daily_snapshots"]) > 90:
-            self.state["daily_snapshots"] = self.state["daily_snapshots"][-90:]
-        self._save_state()
-
-    def run_cycle(self):
-        self.log("=" * 60)
-        self.log("Ciclo bot v11")
-        self.log("=" * 60)
-        if not self.has_positions():
-            self.log("Sin posiciones - invirtiendo automaticamente...")
-            self.run_rebalance()
-        elif self.is_rebalance_day():
-            self.log("Es dia de rebalanceo mensual - rotando posiciones...")
-            self.run_rebalance()
-        else:
-            self.log("Actualizando precios (dejando crecer)...")
-            self.daily_check()
-        self.log("Ciclo completado")
-
-    def run(self, interval_seconds=3600):
-        self.running = True
-        self.log(f"Bot v11 iniciado. Ctrl-C para parar.")
-        def handle_sig(signum, frame):
-            self.running = False
-        sig_module.signal(sig_module.SIGINT, handle_sig)
-        sig_module.signal(sig_module.SIGTERM, handle_sig)
-        while self.running:
-            try:
-                self.run_cycle()
-            except Exception as e:
-                self.log(f"ERROR en ciclo: {e}")
-                import traceback
-                traceback.print_exc()
-            slept = 0
-            while slept < interval_seconds and self.running:
-                time.sleep(min(5, interval_seconds - slept))
-                slept += 5
-        self.log("Bot detenido")
-
-
-if __name__ == "__main__":
-    bot = TradingBotV8()
-    bot.connect_brokers()
-    if "--once" in sys.argv:
-        bot.run_cycle()
-    elif "--rebalance" in sys.argv:
-        bot.run_rebalance()
-    else:
-        bot.run(interval_seconds=6 * 3600)
+                    positions_to_sell.append((asset, qty, current
