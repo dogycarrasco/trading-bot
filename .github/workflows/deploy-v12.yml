@@ -1,0 +1,140 @@
+name: Deploy v12 (ML + VectorBT)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.BOT_PUSH_TOKEN }}
+
+      - name: Crear ML Predictor
+        run: |
+          mkdir -p trading_bot/models
+          cat > trading_bot/models/ml_predictor.py << 'PYEOF'
+import numpy as np
+import pandas as pd
+import lightgbm as lgb
+from sklearn.metrics import accuracy_score
+
+FEATURES = ["vix","fear_greed","fed_funds","yield_spread","mom_3m","mom_6m","mom_12m","rsi","atr_pct","above_ema200"]
+
+class MLPredictor:
+    def __init__(self):
+        self.model = None
+        self.lookback = 252
+        self.horizon = 21
+
+    def prepare_features(self, prices, macro_features):
+        df = prices.copy()
+        df["mom_3m"] = df["close"].pct_change(63)
+        df["mom_6m"] = df["close"].pct_change(126)
+        df["mom_12m"] = df["close"].pct_change(252)
+        delta = df["close"].diff()
+        gain = delta.clip(lower=0).rolling(14).mean()
+        loss = (-delta.clip(upper=0)).rolling(14).mean()
+        df["rsi"] = 100 - 100/(1+gain/loss.replace(0,np.nan))
+        df["rsi"] = df["rsi"].fillna(50)
+        hl = df["high"]-df["low"]
+        df["atr_pct"] = (hl.rolling(14).mean()/df["close"]).fillna(0)
+        df["above_ema200"] = (df["close"] > df["close"].rolling(200).mean()).astype(int)
+        if macro_features is not None and not macro_features.empty:
+            for col in ["vix","fear_greed","fed_funds","yield_spread"]:
+                if col in macro_features.columns:
+                    df[col] = macro_features[col].reindex(df.index).ffill().fillna(0)
+        else:
+            for col in ["vix","fear_greed","fed_funds","yield_spread"]:
+                df[col] = 0
+        return df
+
+    def make_label(self, df):
+        fwd = df["close"].shift(-self.horizon)/df["close"]-1
+        std = fwd.std()
+        thr = std*0.5 if std and std>0 else 0.01
+        return pd.Series(np.where(fwd>thr,1,np.where(fwd<-thr,-1,0)),index=df.index)
+
+    def train_predict(self, df):
+        label = self.make_label(df)
+        feat_df = df[FEATURES].copy()
+        valid = label.notna() & feat_df.notna().all(axis=1)
+        if valid.sum() < 100:
+            return 0, 0.5
+        X = feat_df[valid].values
+        y = label[valid].values
+        if len(np.unique(y))<2:
+            return 0, 0.5
+        split = int(len(X)*0.8)
+        X_tr, X_te = X[:split], X[split:]
+        y_tr, y_te = y[:split], y[split:]
+        if len(np.unique(y_tr))<2:
+            return 0, 0.5
+        tr_data = lgb.Dataset(X_tr,label=y_tr,feature_name=FEATURES)
+        params = {"objective":"multiclass","num_class":3,"metric":"multi_logloss","num_leaves":15,"learning_rate":0.05,"verbosity":-1,"n_estimators":100}
+        self.model = lgb.train(params,tr_data,num_boost_round=100)
+        last = feat_df.iloc[-1:].values
+        probs = self.model.predict(last)[0]
+        pred = np.argmax(probs)-1
+        acc = 0
+        if len(y_te)>5 and len(np.unique(y_te))>1:
+            pred_te = self.model.predict(X_te)
+            pred_te = np.argmax(pred_te,axis=1)-1
+            acc = accuracy_score(y_te,pred_te)
+        return int(pred), float(acc)
+PYEOF
+
+      - name: Crear VectorBT Backtest Engine
+        run: |
+          cat > trading_bot/backtest/vectorbt_engine.py << 'PYEOF'
+import numpy as np
+import pandas as pd
+
+def vectorbt_backtest(prices, signals, initial_capital=500.0):
+    try:
+        import vectorbt as vbt
+    except ImportError:
+        return None
+    try:
+        entries = signals == 1
+        exits = signals == 0
+        pf = vbt.Portfolio.from_signals(prices, entries, exits, init_cash=initial_capital, fees=0.001, slippage=0.0005, freq="D")
+        equity = pf.value()
+        returns = pf.returns()
+        metrics = {"total_return":float(pf.total_return()*100),"sharpe":float(pf.sharpe_ratio()),"max_drawdown":float(pf.max_drawdown()*100),"win_rate":float(pf.trades.win_rate()*100),"n_trades":int(pf.trades.count())}
+        return {"equity":equity,"returns":returns,"metrics":metrics}
+    except Exception as e:
+        print(f"VectorBT error: {e}")
+        return None
+PYEOF
+
+      - name: Actualizar requirements
+        run: |
+          cat > trading_bot/requirements.txt << 'REQEOF'
+pandas>=2.0
+numpy>=1.24
+pyyaml>=6.0
+yfinance>=0.2.30
+requests>=2.28
+lightgbm>=4.0
+scikit-learn>=1.3
+matplotlib>=3.7
+reportlab>=4.0
+quantstats>=0.0.62
+scipy>=1.11
+REQEOF
+
+      - name: Commit y push
+        run: |
+          git config user.name "Deploy Bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add trading_bot/models/ml_predictor.py
+          git add trading_bot/backtest/vectorbt_engine.py
+          git add trading_bot/requirements.txt
+          git commit -m "v12: ML Predictor (LightGBM) + VectorBT Engine"
+          git push
