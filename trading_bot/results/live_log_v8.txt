@@ -1,9 +1,17 @@
 you are using nologin method, data you access may be limited
-[2026-11-11 10:51:44 UTC] ============================================================
-[2026-11-11 10:51:44 UTC] Ciclo bot v12
-[2026-11-11 10:51:44 UTC] ============================================================
-[2026-11-11 10:51:44 UTC] Actualizando precios...
-Descargando datos frescos...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/runner/work/trading-bot/trading-bot/trading_bot/bot/main.py", line 351, in <module>
+    bot.run_cycle()
+  File "/home/runner/work/trading-bot/trading-bot/trading_bot/bot/main.py", line 245, in run_cycle
+    sold = self.check_stops()
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/trading-bot/trading-bot/trading_bot/bot/main.py", line 189, in check_stops
+    elif gain >= self.trailing_trigger and drop <= self.trailing_drop:
+         ^^^^
+UnboundLocalError: cannot access local variable 'gain' where it is not associated with a value
+Descargando datos...
   SPY: 5000 barras
   QQQ: 5000 barras
   XLK: 5000 barras
@@ -23,11 +31,9 @@ Descargando datos frescos...
   XRPUSD: 4841 barras
   ADAUSD: 3269 barras
 Datos descargados.
-[2026-11-11 10:51:59 UTC]   XLV: $188.88 x 0.901876 = $170.35 (P&L +3.68, +2.21%)
-[2026-11-11 10:51:59 UTC]   XLP: $91.03 x 1.850207 = $168.42 (P&L +1.76, +1.05%)
-[2026-11-11 10:51:59 UTC]   USO: $141.45 x 1.123015 = $158.85 (P&L -7.82, -4.69%)
-[2026-11-11 10:51:59 UTC] Total: $497.62 (P&L -2.38, -0.48%)
-
-Cargando features macro...
-[2026-11-11 10:51:59 UTC] Market Score: +40 (BULL) -> 90% eq / 10% cash / 0% hedge
-[2026-11-11 10:51:59 UTC] Ciclo completado
+[2026-11-11 12:53:19 UTC] ============================================================
+[2026-11-11 12:53:19 UTC] Ciclo bot v13 (event-driven)
+[2026-11-11 12:53:19 UTC] ============================================================
+[2026-11-11 12:53:19 UTC]   XLV: $188.88 x 0.901876 = $170.35 (P&L +3.68, +2.21%)
+[2026-11-11 12:53:19 UTC]   XLP: $91.03 x 1.850207 = $168.42 (P&L +1.76, +1.05%)
+[2026-11-11 12:53:19 UTC]   USO: $141.45 x 1.123015 = $158.85 (P&L -7.82, -4.69%)
