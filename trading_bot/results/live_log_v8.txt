@@ -1,39 +1,15 @@
-you are using nologin method, data you access may be limited
-Traceback (most recent call last):
-  File "<frozen runpy>", line 198, in _run_module_as_main
-  File "<frozen runpy>", line 88, in _run_code
-  File "/home/runner/work/trading-bot/trading-bot/trading_bot/bot/main.py", line 351, in <module>
-    bot.run_cycle()
-  File "/home/runner/work/trading-bot/trading-bot/trading_bot/bot/main.py", line 245, in run_cycle
-    sold = self.check_stops()
-           ^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/trading-bot/trading-bot/trading_bot/bot/main.py", line 189, in check_stops
-    elif gain >= self.trailing_trigger and drop <= self.trailing_drop:
-         ^^^^
-UnboundLocalError: cannot access local variable 'gain' where it is not associated with a value
-Descargando datos...
-  SPY: 5000 barras
-  QQQ: 5000 barras
-  XLK: 5000 barras
-  XLF: 5000 barras
-  XLE: 5000 barras
-  XLV: 5000 barras
-  XLY: 5000 barras
-  XLP: 5000 barras
-  XLI: 5000 barras
-  XLU: 5000 barras
-  GLD: 5000 barras
-  USO: 5000 barras
-  BTCUSD: 2505 barras
-  ETHUSD: 3792 barras
-  SOLUSD: 2407 barras
-  BNBUSD: 3408 barras
-  XRPUSD: 4841 barras
-  ADAUSD: 3269 barras
-Datos descargados.
-[2026-11-11 12:56:16 UTC] ============================================================
-[2026-11-11 12:56:16 UTC] Ciclo bot v13 (event-driven)
-[2026-11-11 12:56:16 UTC] ============================================================
-[2026-11-11 12:56:16 UTC]   XLV: $188.88 x 0.901876 = $170.35 (P&L +3.68, +2.21%)
-[2026-11-11 12:56:16 UTC]   XLP: $91.03 x 1.850207 = $168.42 (P&L +1.76, +1.05%)
-[2026-11-11 12:56:16 UTC]   USO: $141.45 x 1.123015 = $158.85 (P&L -7.82, -4.69%)
+[2026-11-11 13:05:41 UTC] Modo: PAPER TRADING SIMULADO (sin broker real)
+[2026-11-11 13:05:41 UTC] Capital inicial: $0.00
+[2026-11-11 13:05:41 UTC] Posiciones actuales: 3
+[2026-11-11 13:05:41 UTC] ============================================================
+[2026-11-11 13:05:41 UTC] Ciclo bot v13 EVENT-DRIVEN
+[2026-11-11 13:05:41 UTC] ============================================================
+[2026-11-11 13:05:41 UTC] Paso 1/3: Actualizar precios de posiciones
+[2026-11-11 13:05:41 UTC]   XLV: $188.88 x 0.901876 = $170.35 (P&L $+3.68, +2.21%)
+[2026-11-11 13:05:41 UTC]   XLP: $91.03 x 1.850207 = $168.42 (P&L $+1.76, +1.05%)
+[2026-11-11 13:05:41 UTC]   USO: $141.45 x 1.123015 = $158.85 (P&L $-7.82, -4.69%)
+[2026-11-11 13:05:41 UTC] Paso 2/3: Verificar stops (stop-loss + trailing)
+[2026-11-11 13:05:41 UTC] Paso 3/3: Escanear oportunidades (find_setups)
+[2026-11-11 13:05:41 UTC]   Cash $0.00 < min $10. No se compra.
+[2026-11-11 13:05:41 UTC] Total portfolio value: $497.62 (cash $0.00, invertido $497.62)
+[2026-11-11 13:05:41 UTC] Ciclo completado
