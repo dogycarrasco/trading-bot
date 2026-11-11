@@ -228,17 +228,17 @@ class TradingBotV8:
         self._save_state()
         self.log(f"Estado guardado. Total: ${total_capital:.2f}")
 
-        def daily_check(self):
-            """Actualiza precios, P&L, market score y hedge."""
-            download_universe_data()
-            positions = self.state.get("positions", {})
-            if not positions:
-                self.log("Sin posiciones. Total: $500.00 (cash)")
-                return
+    def daily_check(self):
+        """Actualiza precios, P&L, market score y hedge."""
+        download_universe_data()
+        positions = self.state.get("positions", {})
+        if not positions:
+            self.log("Sin posiciones. Total: $500.00 (cash)")
+            return
 
-        cash = self.state.get("cash", 0)
-        total_value = cash
-        updated_positions = {}
+       cash = self.state.get("cash", 0)
+       total_value = cash
+       updated_positions = {}
 
         for asset, pos in positions.items():
             df = load_tv_data(asset, "")
