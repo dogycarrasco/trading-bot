@@ -1,11 +1,11 @@
 you are using nologin method, data you access may be limited
-[2026-11-11 01:51:08 UTC] Modo: PAPER TRADING SIMULADO
-[2026-11-11 01:51:08 UTC] Capital inicial: $0.00
-[2026-11-11 01:51:08 UTC] Posiciones actuales: ['XLV', 'XLP', 'USO']
-[2026-11-11 01:51:08 UTC] ============================================================
-[2026-11-11 01:51:08 UTC] Ciclo bot v11
-[2026-11-11 01:51:08 UTC] ============================================================
-[2026-11-11 01:51:08 UTC] Actualizando precios (dejando crecer)...
+[2026-11-11 02:16:30 UTC] Modo: PAPER TRADING SIMULADO
+[2026-11-11 02:16:30 UTC] Capital inicial: $0.00
+[2026-11-11 02:16:30 UTC] Posiciones actuales: ['XLV', 'XLP', 'USO']
+[2026-11-11 02:16:30 UTC] ============================================================
+[2026-11-11 02:16:30 UTC] Ciclo bot v11
+[2026-11-11 02:16:30 UTC] ============================================================
+[2026-11-11 02:16:30 UTC] Actualizando precios (dejando crecer)...
 Descargando datos frescos...
   SPY: 5000 barras
   QQQ: 5000 barras
@@ -26,11 +26,11 @@ Descargando datos frescos...
   XRPUSD: 4841 barras
   ADAUSD: 3269 barras
 Datos descargados.
-[2026-11-11 01:51:17 UTC]   XLV: $188.88 x 0.901876 = $170.35 (P&L +3.68, +2.21%)
-[2026-11-11 01:51:17 UTC]   XLP: $91.03 x 1.850207 = $168.42 (P&L +1.76, +1.05%)
-[2026-11-11 01:51:17 UTC]   USO: $141.45 x 1.123015 = $158.85 (P&L -7.82, -4.69%)
-[2026-11-11 01:51:17 UTC] Total: $497.62 (P&L -2.38, -0.48%)
+[2026-11-11 02:16:44 UTC]   XLV: $188.88 x 0.901876 = $170.35 (P&L +3.68, +2.21%)
+[2026-11-11 02:16:44 UTC]   XLP: $91.03 x 1.850207 = $168.42 (P&L +1.76, +1.05%)
+[2026-11-11 02:16:44 UTC]   USO: $141.45 x 1.123015 = $158.85 (P&L -7.82, -4.69%)
+[2026-11-11 02:16:44 UTC] Total: $497.62 (P&L -2.38, -0.48%)
 
 Cargando features macro...
-[2026-11-11 01:51:17 UTC] Market Score: +40 (BULL) -> 90% eq / 10% cash / 0% hedge
-[2026-11-11 01:51:17 UTC] Ciclo completado
+[2026-11-11 02:16:44 UTC] Market Score: +40 (BULL) -> 90% eq / 10% cash / 0% hedge
+[2026-11-11 02:16:44 UTC] Ciclo completado
