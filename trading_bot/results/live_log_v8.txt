@@ -1,10 +1,33 @@
-Traceback (most recent call last):
-  File "<frozen runpy>", line 189, in _run_module_as_main
-  File "<frozen runpy>", line 159, in _get_module_details
-  File "<frozen importlib._bootstrap_external>", line 1133, in get_code
-  File "<frozen importlib._bootstrap_external>", line 1063, in source_to_code
-  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
-  File "/home/runner/work/trading-bot/trading-bot/trading_bot/bot/main.py", line 267
-    positions_to_sell.append((asset, qty, current
-                             ^
-SyntaxError: '(' was never closed
+you are using nologin method, data you access may be limited
+[2026-11-11 02:53:18 UTC] ============================================================
+[2026-11-11 02:53:18 UTC] Ciclo bot v12
+[2026-11-11 02:53:18 UTC] ============================================================
+[2026-11-11 02:53:18 UTC] Actualizando precios...
+Descargando datos frescos...
+  SPY: 5000 barras
+  QQQ: 5000 barras
+  XLK: 5000 barras
+  XLF: 5000 barras
+  XLE: 5000 barras
+  XLV: 5000 barras
+  XLY: 5000 barras
+  XLP: 5000 barras
+  XLI: 5000 barras
+  XLU: 5000 barras
+  GLD: 5000 barras
+  USO: 5000 barras
+  BTCUSD: 2505 barras
+  ETHUSD: 3792 barras
+  SOLUSD: 2407 barras
+  BNBUSD: 3408 barras
+  XRPUSD: 4841 barras
+  ADAUSD: 3269 barras
+Datos descargados.
+[2026-11-11 02:53:26 UTC]   XLV: $188.88 x 0.901876 = $170.35 (P&L +3.68, +2.21%)
+[2026-11-11 02:53:26 UTC]   XLP: $91.03 x 1.850207 = $168.42 (P&L +1.76, +1.05%)
+[2026-11-11 02:53:26 UTC]   USO: $141.45 x 1.123015 = $158.85 (P&L -7.82, -4.69%)
+[2026-11-11 02:53:26 UTC] Total: $497.62 (P&L -2.38, -0.48%)
+
+Cargando features macro...
+[2026-11-11 02:53:26 UTC] Market Score: +40 (BULL) -> 90% eq / 10% cash / 0% hedge
+[2026-11-11 02:53:26 UTC] Ciclo completado
