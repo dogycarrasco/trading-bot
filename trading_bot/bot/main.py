@@ -74,6 +74,9 @@ class TradingBotV8:
         self.last_rebalance = None
         self.state = self._load_state()
         self.hedge_manager = OptionsHedgeManager()
+        self.stop_loss_pct = -0.05
+        self.trailing_stop_trigger = 0.10
+        self.trailing_stop_drop = -0.05
 
     def log(self, msg):
         ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
@@ -192,6 +195,7 @@ class TradingBotV8:
                             "entry_price": price,
                             "value": target_value,
                             "weight": w,
+                            "peak_price": price,
                         }
                         self.log(f"  >>> {asset}: qty={qty:.6f} @ ${price:.2f} = ${target_value:.2f}")
         cash_remaining = total_capital - sum(p["value"] for p in new_positions.values())
@@ -209,7 +213,7 @@ class TradingBotV8:
         self.log(f"Estado guardado. Total: ${total_capital:.2f}")
 
     def daily_check(self):
-        """Actualiza precios, P&L, market score y hedge."""
+        """Actualiza precios, aplica stop-loss, trailing stop, market score y hedge."""
         download_universe_data()
         positions = self.state.get("positions", {})
         if not positions:
@@ -218,31 +222,82 @@ class TradingBotV8:
         cash = self.state.get("cash", 0)
         total_value = cash
         updated_positions = {}
+        positions_to_sell = []
+
         for asset, pos in positions.items():
             df = load_tv_data(asset, "")
             if not df.empty:
                 current_price = float(df["close"].iloc[-1])
                 qty = pos.get("qty", 0)
                 entry_price = pos.get("entry_price", current_price)
+                peak_price = pos.get("peak_price", entry_price)
                 value = qty * current_price
                 pnl = (current_price - entry_price) * qty
                 pnl_pct = ((current_price / entry_price) - 1) * 100 if entry_price > 0 else 0
                 total_value += value
+
+                # Actualizar peak price
+                if current_price > peak_price:
+                    peak_price = current_price
+
+                # MEJORA 1: STOP-LOSS - vender si cae mas del 5%
+                if pnl_pct / 100 <= self.stop_loss_pct:
+                    self.log(f"  STOP-LOSS {asset}: {pnl_pct:+.2f}% <= {self.stop_loss_pct*100:.0f}% - VENDIENDO")
+                    positions_to_sell.append((asset, qty, current_price, pnl, "STOP_LOSS"))
+                    continue
+
+                # MEJORA 2: TRAILING STOP - si subio >10% y luego cae >5% desde el peak
+                gain_from_entry = (peak_price / entry_price - 1) if entry_price > 0 else 0
+                drop_from_peak = (current_price / peak_price - 1) if peak_price > 0 else 0
+                if gain_from_entry >= self.trailing_stop_trigger and drop_from_peak <= self.trailing_stop_drop:
+                    self.log(f"  TRAILING STOP {asset}: subio {gain_from_entry*100:+.1f}%, cae {drop_from_peak*100:+.1f}% del peak - VENDIENDO")
+                    positions_to_sell.append((asset, qty, current_price, pnl, "TRAILING_STOP"))
+                    continue
+
                 updated_positions[asset] = {
                     "qty": qty,
                     "entry_price": entry_price,
                     "value": value,
                     "current_price": current_price,
                     "weight": pos.get("weight", 0),
+                    "peak_price": peak_price,
                 }
                 self.log(f"  {asset}: ${current_price:.2f} x {qty:.6f} = ${value:.2f} (P&L {pnl:+.2f}, {pnl_pct:+.2f}%)")
             else:
                 updated_positions[asset] = pos
                 total_value += pos.get("value", 0)
+
+        # MEJORA 1+2: Procesar ventas
+        if positions_to_sell:
+            for asset, qty, sell_price, pnl, reason in positions_to_sell:
+                cash += qty * sell_price
+                self.log(f"  >>> VENDIDO {asset} @ ${sell_price:.2f} (P&L {pnl:+.2f}) - {reason}")
+                # Guardar en trade memory
+                trade = {
+                    "symbol": asset,
+                    "exit_price": sell_price,
+                    "qty": qty,
+                    "pnl": pnl,
+                    "exit_reason": reason,
+                    "date": datetime.now(timezone.utc).isoformat(),
+                }
+                if "trade_history" not in self.state:
+                    self.state["trade_history"] = []
+                self.state["trade_history"].append(trade)
+
         self.state["positions"] = updated_positions
-        total_pnl = total_value - 500
+        self.state["cash"] = cash
+        total_pnl = total_value + sum(qty * price for _, qty, price, _, _ in positions_to_sell) - 500
         total_pnl_pct = (total_pnl / 500) * 100
         self.log(f"Total: ${total_value:.2f} (P&L {total_pnl:+.2f}, {total_pnl_pct:+.2f}%)")
+
+        # MEJORA 3: Si vendimos posiciones y tenemos cash, reinvertir
+        if positions_to_sell and cash > 50:
+            self.log(f"  REINVERTIR: ${cash:.2f} en cash disponible - rebalanceando...")
+            self.run_rebalance()
+            return
+
+        # MARKET SCORE + HEDGE
         try:
             features = load_macro_features()
             if not features.empty:
@@ -272,19 +327,20 @@ class TradingBotV8:
                 if put_price > 0:
                     n_contracts = max(1, int(hedge_budget / (put_price * 100)))
                     pos = self.hedge_manager.buy_put(spy_price, vix_val, quantity=n_contracts)
-                    self.log(f"  HEDGE: Comprados {n_contracts} puts SPY strike ${pos['strike']:.2f} @ ${put_price:.2f} (costo ${pos['cost']:.2f})")
+                    self.log(f"  HEDGE: Comprados {n_contracts} puts SPY strike ${pos['strike']:.2f} @ ${put_price:.2f}")
             if self.hedge_manager.positions:
                 self.hedge_manager.update_positions(spy_price, vix_val)
                 hs = self.hedge_manager.get_summary()
-                self.log(f"  HEDGE: {hs['open_positions']} puts abiertos, valor ${hs['current_value']:.2f}, P&L ${hs['pnl']:.2f}")
+                self.log(f"  HEDGE: {hs['open_positions']} puts, valor ${hs['current_value']:.2f}, P&L ${hs['pnl']:.2f}")
             if score > 0 and self.hedge_manager.positions:
                 self.hedge_manager.close_all(spy_price, vix_val)
-                self.log(f"  HEDGE: Cerrados todos los puts (mercado se recupero)")
+                self.log(f"  HEDGE: Cerrados todos los puts")
             self.state["market_score"] = score
             self.state["market_regime"] = regime
             self.state["hedge_summary"] = self.hedge_manager.get_summary()
         except Exception as e:
             self.log(f"  HEDGE: error {e}")
+
         snapshot = {
             "date": datetime.now(timezone.utc).isoformat(),
             "total_value": total_value,
