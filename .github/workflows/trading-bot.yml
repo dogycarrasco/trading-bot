@@ -2,7 +2,7 @@ name: Trading Bot v9
 
 on:
   schedule:
-    - cron: '0 2,6,12,18 * * *'
+    - cron: '0 */2 * * *'
   workflow_dispatch:
 
 permissions:
