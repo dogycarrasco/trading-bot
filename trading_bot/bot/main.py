@@ -41,7 +41,7 @@ def download_universe_data():
         return
     for sym, exch, desc in UNIVERSE_V8:
         cache_path = os.path.join(ROOT, "data", "tv_cache", f"{sym}_{exch}.csv")
-        if not os.path.exists(cache_path):
+        if True:
             try:
                 df = tv.get_hist(symbol=sym, exchange=exch, interval=Interval.in_daily, n_bars=5000)
                 if df is not None and len(df) > 0:
