@@ -233,8 +233,8 @@ class TradingBotV8:
             download_universe_data()
             positions = self.state.get("positions", {})
             if not positions:
-            self.log("Sin posiciones. Total: $500.00 (cash)")
-            return
+                self.log("Sin posiciones. Total: $500.00 (cash)")
+                return
 
         cash = self.state.get("cash", 0)
         total_value = cash
