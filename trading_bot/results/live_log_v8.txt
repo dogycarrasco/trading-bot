@@ -1,10 +1,16 @@
 Traceback (most recent call last):
-  File "<frozen runpy>", line 189, in _run_module_as_main
-  File "<frozen runpy>", line 159, in _get_module_details
-  File "<frozen importlib._bootstrap_external>", line 1133, in get_code
-  File "<frozen importlib._bootstrap_external>", line 1063, in source_to_code
-  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
-  File "/home/runner/work/trading-bot/trading-bot/trading_bot/bot/main.py", line 236
-    self.log("Sin posiciones. Total: $500.00 (cash)")
-    ^^^^
-IndentationError: expected an indented block after 'if' statement on line 235
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/runner/work/trading-bot/trading-bot/trading_bot/bot/main.py", line 387, in <module>
+    bot.run_cycle()
+  File "/home/runner/work/trading-bot/trading-bot/trading_bot/bot/main.py", line 355, in run_cycle
+    self.daily_check()
+    ^^^^^^^^^^^^^^^^
+AttributeError: 'TradingBotV8' object has no attribute 'daily_check'
+[2026-11-11 01:40:07 UTC] Modo: PAPER TRADING SIMULADO
+[2026-11-11 01:40:07 UTC] Capital inicial: $0.00
+[2026-11-11 01:40:07 UTC] Posiciones actuales: ['XLV', 'XLP', 'USO']
+[2026-11-11 01:40:07 UTC] ============================================================
+[2026-11-11 01:40:07 UTC] Ciclo bot v11
+[2026-11-11 01:40:07 UTC] ============================================================
+[2026-11-11 01:40:07 UTC] Actualizando precios (dejando crecer)...
