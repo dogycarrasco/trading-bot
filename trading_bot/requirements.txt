@@ -1,5 +1,4 @@
-# v11: Black-Scholes
-pandas>=2.0
+﻿pandas>=2.0
 numpy>=1.24
 pyyaml>=6.0
 yfinance>=0.2.30
