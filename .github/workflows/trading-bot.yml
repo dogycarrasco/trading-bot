@@ -1,6 +1,5 @@
-- name: Install dependencies
-  run: |
-    pip install -r trading_bot/requirements.txt
+name: Trading Bot v32
+
 on:
   schedule:
     - cron: '0 */2 * * *'
@@ -68,14 +67,13 @@ jobs:
           os.makedirs('data/tv_cache', exist_ok=True)
           for sym, exch in universe:
               path = f'data/tv_cache/{sym}_{exch}.csv'
-              if True:
-                  try:
-                      df = tv.get_hist(symbol=sym, exchange=exch, interval=Interval.in_daily, n_bars=5000)
-                      if df is not None and len(df) > 0:
-                          df.to_csv(path)
-                          print(f'{sym}: {len(df)} barras')
-                  except Exception as e:
-                      print(f'{sym}: ERROR {e}')
+              try:
+                  df = tv.get_hist(symbol=sym, exchange=exch, interval=Interval.in_daily, n_bars=5000)
+                  if df is not None and len(df) > 0:
+                      df.to_csv(path)
+                      print(f'{sym}: {len(df)} barras')
+              except Exception as e:
+                  print(f'{sym}: ERROR {e}')
           print('Datos descargados.')
           "
 
@@ -115,7 +113,7 @@ jobs:
                   dates = pd.to_datetime([s.get('date') for s in snapshots])
                   equity = pd.Series(values, index=dates)
                   returns = equity.pct_change().dropna()
-                  qs.reports.html(returns, output='results/tearsheet.html', title='Bot v10 Live', download_images=True)
+                  qs.reports.html(returns, output='results/tearsheet.html', title='Bot v32 Live', download_images=True)
                   print('Tearsheet generado OK')
               else:
                   print('Sin suficientes snapshots para tearsheet aun')
