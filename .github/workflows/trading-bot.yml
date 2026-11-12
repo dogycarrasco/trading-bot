@@ -1,5 +1,6 @@
-name: Trading Bot v9
-
+- name: Install dependencies
+  run: |
+    pip install -r trading_bot/requirements.txt
 on:
   schedule:
     - cron: '0 */2 * * *'
