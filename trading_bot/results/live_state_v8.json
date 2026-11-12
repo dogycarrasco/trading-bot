@@ -4,24 +4,24 @@
     "XLV": {
       "qty": 0.9018759018759017,
       "entry_price": 184.8,
-      "value": 170.40945165945163,
-      "current_price": 188.95,
+      "value": 170.91450216450212,
+      "current_price": 189.51,
       "weight": 0.3333333333333333,
-      "peak_price": 188.95
+      "peak_price": 189.51
     },
     "XLP": {
       "qty": 1.8502072232089994,
       "entry_price": 90.08,
-      "value": 169.201450562463,
-      "current_price": 91.45,
+      "value": 169.5529899348727,
+      "current_price": 91.64,
       "weight": 0.3333333333333333,
-      "peak_price": 91.45
+      "peak_price": 91.64
     },
     "USO": {
       "qty": 1.1230150708622508,
       "entry_price": 148.41,
-      "value": 158.87294207488262,
-      "current_price": 141.47,
+      "value": 159.29968780181028,
+      "current_price": 141.85,
       "weight": 0.3333333333333333,
       "peak_price": 148.41
     }
@@ -375,19 +375,41 @@
       },
       "week_pnl": 0.0,
       "week_pct": 0.0
+    },
+    {
+      "date": "2026-11-12T14:50:36.189473+00:00",
+      "total_value": 499.7671799011851,
+      "cash": 0.0,
+      "positions_count": 3,
+      "positions": {
+        "XLV": {
+          "value": 170.91450216450212,
+          "pnl_pct": 2.5487012987012836
+        },
+        "XLP": {
+          "value": 169.5529899348727,
+          "pnl_pct": 1.7317939609236221
+        },
+        "USO": {
+          "value": 159.29968780181028,
+          "pnl_pct": -4.420187318913826
+        }
+      },
+      "week_pnl": 0.0,
+      "week_pct": 0.0
     }
   ],
   "version": "v13_event_driven",
   "cooldowns": {},
-  "total_value": 498.48384429679726,
-  "last_update": "2026-11-12T12:58:03.422009+00:00",
-  "peak_equity": 498.48384429679726,
+  "total_value": 499.7671799011851,
+  "last_update": "2026-11-12T14:50:36.189473+00:00",
+  "peak_equity": 499.7671799011851,
   "circuit_breaker_until": null,
   "weekly_stats": [
     {
       "week": "2026-11-09",
       "start_value": 498.48384429679726,
-      "current_value": 498.48384429679726,
+      "current_value": 499.7671799011851,
       "current_pnl": 0.0,
       "current_pct": 0.0
     }
