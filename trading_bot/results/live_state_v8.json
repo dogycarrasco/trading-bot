@@ -287,12 +287,34 @@
       },
       "week_pnl": 0.0,
       "week_pct": 0.0
+    },
+    {
+      "date": "2026-11-12T07:02:55.479821+00:00",
+      "total_value": 498.48384429679726,
+      "cash": 0.0,
+      "positions_count": 3,
+      "positions": {
+        "XLV": {
+          "value": 170.40945165945163,
+          "pnl_pct": 2.2456709956709897
+        },
+        "XLP": {
+          "value": 169.201450562463,
+          "pnl_pct": 1.5208703374778088
+        },
+        "USO": {
+          "value": 158.87294207488262,
+          "pnl_pct": -4.676234755070407
+        }
+      },
+      "week_pnl": 0.0,
+      "week_pct": 0.0
     }
   ],
   "version": "v13_event_driven",
   "cooldowns": {},
   "total_value": 498.48384429679726,
-  "last_update": "2026-11-12T04:52:32.789117+00:00",
+  "last_update": "2026-11-12T07:02:55.479821+00:00",
   "peak_equity": 498.48384429679726,
   "circuit_breaker_until": null,
   "weekly_stats": [
