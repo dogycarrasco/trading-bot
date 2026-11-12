@@ -4,24 +4,24 @@
     "XLV": {
       "qty": 0.9018759018759017,
       "entry_price": 184.8,
-      "value": 170.86038961038957,
-      "current_price": 189.45,
+      "value": 170.09379509379505,
+      "current_price": 188.6,
       "weight": 0.3333333333333333,
       "peak_price": 189.51
     },
     "XLP": {
       "qty": 1.8502072232089994,
       "entry_price": 90.08,
-      "value": 169.25695677915928,
-      "current_price": 91.48,
+      "value": 168.9609236234458,
+      "current_price": 91.32,
       "weight": 0.3333333333333333,
       "peak_price": 91.64
     },
     "USO": {
       "qty": 1.1230150708622508,
       "entry_price": 148.41,
-      "value": 160.93928980526917,
-      "current_price": 143.31,
+      "value": 162.7922646721919,
+      "current_price": 144.96,
       "weight": 0.3333333333333333,
       "peak_price": 148.41
     }
@@ -419,19 +419,41 @@
       },
       "week_pnl": 0.0,
       "week_pct": 0.0
+    },
+    {
+      "date": "2026-11-12T18:46:29.535243+00:00",
+      "total_value": 501.84698338943275,
+      "cash": 0.0,
+      "positions_count": 3,
+      "positions": {
+        "XLV": {
+          "value": 170.09379509379505,
+          "pnl_pct": 2.056277056277045
+        },
+        "XLP": {
+          "value": 168.9609236234458,
+          "pnl_pct": 1.3765541740674792
+        },
+        "USO": {
+          "value": 162.7922646721919,
+          "pnl_pct": -2.3246411966848513
+        }
+      },
+      "week_pnl": 0.0,
+      "week_pct": 0.0
     }
   ],
   "version": "v13_event_driven",
   "cooldowns": {},
-  "total_value": 501.056636194818,
-  "last_update": "2026-11-12T16:56:19.744875+00:00",
-  "peak_equity": 501.056636194818,
+  "total_value": 501.84698338943275,
+  "last_update": "2026-11-12T18:46:29.535243+00:00",
+  "peak_equity": 501.84698338943275,
   "circuit_breaker_until": null,
   "weekly_stats": [
     {
       "week": "2026-11-09",
       "start_value": 498.48384429679726,
-      "current_value": 501.056636194818,
+      "current_value": 501.84698338943275,
       "current_pnl": 0.0,
       "current_pct": 0.0
     }
