@@ -1,5 +1,5 @@
 """
-Orquestador live paper trading - Bot v34 INTELLIGENT.
+Orquestador live paper trading - Bot v35 ADAPTIVE.
 
 Mejor version validada por grid search (17 iteraciones v13-v29):
   - CAGR +11.33% > SPY +8.58%
@@ -68,7 +68,7 @@ class TradingBotV15:
     SL_FACTOR = 5.0
     MAX_HOLD_DAYS = 63
     MIN_VOTES = 3
-    CIRCUIT_BREAKER_DD = -0.15
+    CIRCUIT_BREAKER_DD = -0.10
     CIRCUIT_BREAKER_DAYS = 30
     CIRCUIT_BREAKER_SIZE_MULT = 0.5
     BEAR_REGIME_THRESHOLD = -20
@@ -88,7 +88,7 @@ class TradingBotV15:
         self.state_path = os.path.join(ROOT, "results", "live_state_v8.json")
         os.makedirs(os.path.dirname(self.log_path), exist_ok=True)
         self.state = self._load_state()
-        self.state.setdefault("version", "v34_intelligent")
+        self.state.setdefault("version", "v35_adaptive")
         self.state.setdefault("positions", {})
         self.state.setdefault("cash", 500.0)
         self.state.setdefault("history", [])
@@ -102,7 +102,7 @@ class TradingBotV15:
         self.boom_detector = BoomCrashDetector()
         self.weekly_size_mult = 1.0
         self.weekly_returns_history = []
-        self.dividends_collected = 0.0
+        self.dividends_collected = self.state.get('dividends_collected', 0.0)
         self.macro_features = None
 
     # ---------- logging ----------
@@ -121,7 +121,7 @@ class TradingBotV15:
                     return json.load(f)
             except Exception:
                 pass
-        return {"version": "v34_intelligent",
+        return {"version": "v35_adaptive",
                 "positions": {}, "cash": 500.0,
                 "history": [], "daily_snapshots": [],
                 "cooldowns": [], "peak_equity": 500.0,
@@ -533,6 +533,10 @@ class TradingBotV15:
                     self.weekly_size_mult = min(1.3, self.weekly_size_mult + 0.05)
                 elif avg < -0.01:
                     self.weekly_size_mult = max(0.7, self.weekly_size_mult - 0.05)
+                if len(self.weekly_returns_history) >= 2:
+                    last2 = self.weekly_returns_history[-2:]
+                    if all(r < -0.01 for r in last2):
+                        self.weekly_size_mult = 0.5
         self.log(f"  v34 weekly size: {self.weekly_size_mult:.2f}x | dividends: ${self.dividends_collected:.2f}")
         snap = {
             "date": today.isoformat(),
@@ -551,6 +555,7 @@ class TradingBotV15:
         if len(snaps) > 90:
             self.state["daily_snapshots"] = snaps[-90:]
         self.state["total_value"] = total_value
+        self.state["dividends_collected"] = self.dividends_collected
         self.state["last_update"] = today.isoformat()
         self.state["current_week_pnl"] = week_pnl
         self.state["current_week_pct"] = week_pct
@@ -559,7 +564,7 @@ class TradingBotV15:
     # ---------- ciclo principal ----------
     def run_cycle(self):
         self.log("=" * 60)
-        self.log("Ciclo bot v34 INTELLIGENT")
+        self.log("Ciclo bot v35 ADAPTIVE")
         self.log("=" * 60)
         self.log("Paso 1/5: Actualizar precios de posiciones")
         self.update_positions_prices()
@@ -600,7 +605,7 @@ class TradingBotV15:
 
     def reset(self):
         self.log("RESET completo -> $500 cash, 0 posiciones, 0 cooldowns")
-        self.state = {"version": "v34_intelligent",
+        self.state = {"version": "v35_adaptive",
                       "positions": {}, "cash": 500.0,
                       "history": [], "daily_snapshots": [],
                       "cooldowns": [],
