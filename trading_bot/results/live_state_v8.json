@@ -4,24 +4,24 @@
     "XLV": {
       "qty": 0.9018759018759017,
       "entry_price": 184.8,
-      "value": 169.3362193362193,
-      "current_price": 187.76,
+      "value": 169.94047619047618,
+      "current_price": 188.43,
       "weight": 0.3333333333333333,
       "peak_price": 189.51
     },
     "XLP": {
       "qty": 1.8502072232089994,
       "entry_price": 90.08,
-      "value": 169.99703966844285,
-      "current_price": 91.88,
+      "value": 170.5798549437537,
+      "current_price": 92.195,
       "weight": 0.3333333333333333,
-      "peak_price": 91.88
+      "peak_price": 92.195
     },
     "USO": {
       "qty": 1.1230150708622508,
       "entry_price": 148.41,
-      "value": 164.75754104620083,
-      "current_price": 146.71,
+      "value": 163.43238326258336,
+      "current_price": 145.53,
       "weight": 0.3333333333333333,
       "peak_price": 148.41
     }
@@ -749,24 +749,46 @@
       },
       "week_pnl": 0.0,
       "week_pct": 0.0
+    },
+    {
+      "date": "2026-11-13T18:44:43.569615+00:00",
+      "total_value": 503.95271439681323,
+      "cash": 0.0,
+      "positions_count": 3,
+      "positions": {
+        "XLV": {
+          "value": 169.94047619047618,
+          "pnl_pct": 1.9642857142857073
+        },
+        "XLP": {
+          "value": 170.5798549437537,
+          "pnl_pct": 2.347912966252208
+        },
+        "USO": {
+          "value": 163.43238326258336,
+          "pnl_pct": -1.9405700424499628
+        }
+      },
+      "week_pnl": -0.13808565404974615,
+      "week_pct": -0.027393012139043105
     }
   ],
   "version": "v13_event_driven",
   "cooldowns": {},
-  "total_value": 504.090800050863,
-  "last_update": "2026-11-13T16:47:45.809106+00:00",
+  "total_value": 503.95271439681323,
+  "last_update": "2026-11-13T18:44:43.569615+00:00",
   "peak_equity": 504.090800050863,
   "circuit_breaker_until": null,
   "weekly_stats": [
     {
       "week": "2026-11-09",
       "start_value": 498.48384429679726,
-      "current_value": 504.090800050863,
-      "current_pnl": 0.0,
-      "current_pct": 0.0
+      "current_value": 503.95271439681323,
+      "current_pnl": -0.13808565404974615,
+      "current_pct": -0.027393012139043105
     }
   ],
-  "current_week_pnl": 0.0,
-  "current_week_pct": 0.0,
+  "current_week_pnl": -0.13808565404974615,
+  "current_week_pct": -0.027393012139043105,
   "dividends_collected": 0.0
 }
