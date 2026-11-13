@@ -1,0 +1,83 @@
+name: Auto-Mejora Semanal
+
+on:
+  schedule:
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  auto-mejora:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout codigo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Instalar dependencias
+        run: |
+          pip install --quiet -r trading_bot/requirements.txt
+          pip install --quiet git+https://github.com/rongardF/tvdatafeed.git
+          pip install --quiet yfinance lightgbm scikit-learn statsmodels
+
+      - name: Restaurar cache de datos
+        uses: actions/cache@v4
+        with:
+          path: |
+            trading_bot/data/tv_cache/
+            trading_bot/data/external/
+          key: bot-data-${{ github.run_id }}
+          restore-keys: |
+            bot-data-
+
+      - name: Descargar datos frescos
+        run: |
+          cd trading_bot
+          python -c "
+          from tvDatafeed import TvDatafeed, Interval
+          import os
+          tv = TvDatafeed()
+          universe = [
+              ('SPY','AMEX'),('QQQ','NASDAQ'),('XLK','AMEX'),('XLF','AMEX'),('XLE','AMEX'),
+              ('XLV','AMEX'),('XLY','AMEX'),('XLP','AMEX'),('XLI','AMEX'),('XLU','AMEX'),
+              ('GLD','AMEX'),('USO','AMEX'),
+              ('BTCUSD','BINANCE'),('ETHUSD','BINANCE'),('SOLUSD','BINANCE'),
+              ('BNBUSD','BINANCE'),('XRPUSD','BINANCE'),('ADAUSD','BINANCE'),
+              ('VIX','CBOE')
+          ]
+          os.makedirs('data/tv_cache', exist_ok=True)
+          for sym, exch in universe:
+              path = f'data/tv_cache/{sym}_{exch}.csv'
+              try:
+                  df = tv.get_hist(symbol=sym, exchange=exch, interval=Interval.in_daily, n_bars=5000)
+                  if df is not None and len(df) > 0:
+                      df.to_csv(path)
+                      print(f'{sym}: {len(df)} barras')
+              except Exception as e:
+                  print(f'{sym}: ERROR {e}')
+          print('Datos listos.')
+          "
+
+      - name: Ejecutar auto-mejora semanal
+        run: |
+          cd trading_bot
+          python scripts/auto_mejora.py 2>&1 | tee ../auto_mejora_run.log
+
+      - name: Guardar reporte (commit)
+        run: |
+          git config user.name "Auto-Mejora Bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add trading_bot/results/auto_mejora_report.json
+          git add trading_bot/results/auto_mejora_history.json
+          git add trading_bot/results/best_params.json 2>/dev/null || true
+          git commit -m "Auto-mejora semanal: $(date -u '+%Y-%m-%d %H:%M')" || echo "Nada que commitear"
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:main || echo "Push fallido"
