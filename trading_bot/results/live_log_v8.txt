@@ -1,22 +1,22 @@
-[2026-11-13 20:47:37 UTC] Modo: PAPER TRADING SIMULADO (sin broker real)
-[2026-11-13 20:47:37 UTC] Capital inicial: $0.00
-[2026-11-13 20:47:37 UTC] Posiciones actuales: 3
-[2026-11-13 20:47:37 UTC] Estrategia: 5 capas votando (Regime+Sentiment+Onchain+Trend+Setup)
-[2026-11-13 20:47:37 UTC] Compra si >= 3 capas votan +1
-[2026-11-13 20:47:37 UTC] ============================================================
-[2026-11-13 20:47:37 UTC] Ciclo bot v35 ADAPTIVE
-[2026-11-13 20:47:37 UTC] ============================================================
-[2026-11-13 20:47:37 UTC] Paso 1/5: Actualizar precios de posiciones
-[2026-11-13 20:47:37 UTC]   XLV: $188.63 x 0.901876 = $170.12 (P&L $+3.45, +2.07%)
-[2026-11-13 20:47:37 UTC]   XLP: $92.21 x 1.850207 = $170.61 (P&L $+3.94, +2.36%)
-[2026-11-13 20:47:37 UTC]   USO: $145.48 x 1.123015 = $163.38 (P&L $-3.29, -1.97%)
-[2026-11-13 20:47:37 UTC] Paso 2/5: Verificar exits (triple barrier + trailing)
-[2026-11-13 20:47:37 UTC] Paso 3/5: Circuit breaker check
-[2026-11-13 20:47:37 UTC] Paso 4/5: Escanear oportunidades (5 capas votando)
-[2026-11-13 20:47:37 UTC]   Cash $0.00 < min $10. No se compra.
-[2026-11-13 20:47:37 UTC] Paso 5/5: Snapshot + reporte semanal
-[2026-11-13 20:47:37 UTC] Total portfolio value: $504.10 (cash $0.00, invertido $504.10)
-[2026-11-13 20:47:37 UTC]   Esta semana (desde 2026-11-09): +$0.00 (+0.00%)
-[2026-11-13 20:47:37 UTC]   >>> Semana POSITIVA
-[2026-11-13 20:47:37 UTC]   v34 weekly size: 1.00x | dividends: $0.00
-[2026-11-13 20:47:37 UTC] Ciclo completado
+[2026-11-13 22:39:25 UTC] Modo: PAPER TRADING SIMULADO (sin broker real)
+[2026-11-13 22:39:25 UTC] Capital inicial: $0.00
+[2026-11-13 22:39:25 UTC] Posiciones actuales: 3
+[2026-11-13 22:39:25 UTC] Estrategia: 5 capas votando (Regime+Sentiment+Onchain+Trend+Setup)
+[2026-11-13 22:39:25 UTC] Compra si >= 3 capas votan +1
+[2026-11-13 22:39:25 UTC] ============================================================
+[2026-11-13 22:39:25 UTC] Ciclo bot v35 ADAPTIVE
+[2026-11-13 22:39:25 UTC] ============================================================
+[2026-11-13 22:39:25 UTC] Paso 1/5: Actualizar precios de posiciones
+[2026-11-13 22:39:25 UTC]   XLV: $188.85 x 0.901876 = $170.32 (P&L $+3.65, +2.19%)
+[2026-11-13 22:39:25 UTC]   XLP: $92.35 x 1.850207 = $170.87 (P&L $+4.20, +2.52%)
+[2026-11-13 22:39:25 UTC]   USO: $145.58 x 1.123015 = $163.49 (P&L $-3.18, -1.91%)
+[2026-11-13 22:39:25 UTC] Paso 2/5: Verificar exits (triple barrier + trailing)
+[2026-11-13 22:39:25 UTC] Paso 3/5: Circuit breaker check
+[2026-11-13 22:39:25 UTC] Paso 4/5: Escanear oportunidades (5 capas votando)
+[2026-11-13 22:39:25 UTC]   Cash $0.00 < min $10. No se compra.
+[2026-11-13 22:39:25 UTC] Paso 5/5: Snapshot + reporte semanal
+[2026-11-13 22:39:25 UTC] Total portfolio value: $504.67 (cash $0.00, invertido $504.67)
+[2026-11-13 22:39:25 UTC]   Esta semana (desde 2026-11-09): +$0.00 (+0.00%)
+[2026-11-13 22:39:25 UTC]   >>> Semana POSITIVA
+[2026-11-13 22:39:25 UTC]   v34 weekly size: 1.00x | dividends: $0.00
+[2026-11-13 22:39:25 UTC] Ciclo completado
