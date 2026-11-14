@@ -111,6 +111,9 @@ class TradingBotV15:
         self.monthly_size_mult = self.state.get('monthly_size_mult', 1.0)
         self.last_month_check = None
         self.weekly_size_mult = 1.0
+        self.finbert = None
+        self.news_headlines = []
+        self.news_last_fetch = None
         self.weekly_returns_history = []
         self.dividends_collected = self.state.get('dividends_collected', 0.0)
         self.macro_features = None
