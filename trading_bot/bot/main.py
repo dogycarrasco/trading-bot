@@ -1,5 +1,5 @@
 """
-Orquestador live paper trading - Bot v35 ADAPTIVE.
+Orquestador live paper trading - Bot v38 PREDICTIVE.
 
 Mejor version validada por grid search (17 iteraciones v13-v29):
   - CAGR +11.33% > SPY +8.58%
@@ -54,6 +54,7 @@ from features.triple_barrier import (
 )
 from features.options_hedge import compute_market_score
 from features.v34_extras import BoomCrashDetector, check_daily_weekly_alignment, ETF_DIVIDENDS
+from features.v38_predictive import GMMCrisis, PCAFactor, rsi_ema_vwap_filter, ewma_vol_at_date
 
 
 class TradingBotV15:
@@ -88,7 +89,7 @@ class TradingBotV15:
         self.state_path = os.path.join(ROOT, "results", "live_state_v8.json")
         os.makedirs(os.path.dirname(self.log_path), exist_ok=True)
         self.state = self._load_state()
-        self.state.setdefault("version", "v35_adaptive")
+        self.state.setdefault("version", "v38_predictive")
         self.state.setdefault("positions", {})
         self.state.setdefault("cash", 500.0)
         self.state.setdefault("history", [])
@@ -100,6 +101,10 @@ class TradingBotV15:
 
         self.engine = MultiSignalEngine(min_votes_to_buy=self.MIN_VOTES)
         self.boom_detector = BoomCrashDetector()
+        self.gmm_crisis = GMMCrisis()
+        self.pca_factor = PCAFactor()
+        self.monthly_size_mult = self.state.get('monthly_size_mult', 1.0)
+        self.last_month_check = None
         self.weekly_size_mult = 1.0
         self.weekly_returns_history = []
         self.dividends_collected = self.state.get('dividends_collected', 0.0)
@@ -121,7 +126,7 @@ class TradingBotV15:
                     return json.load(f)
             except Exception:
                 pass
-        return {"version": "v35_adaptive",
+        return {"version": "v38_predictive",
                 "positions": {}, "cash": 500.0,
                 "history": [], "daily_snapshots": [],
                 "cooldowns": [], "peak_equity": 500.0,
@@ -556,6 +561,22 @@ class TradingBotV15:
             self.state["daily_snapshots"] = snaps[-90:]
         self.state["total_value"] = total_value
         self.state["dividends_collected"] = self.dividends_collected
+        self.state["monthly_size_mult"] = self.monthly_size_mult
+        # v38: monthly compounding
+        ts_now = pd.Timestamp(self._today())
+        month_start = ts_now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        if self.last_month_check is not None and month_start > self.last_month_check:
+            snaps = self.state.get("daily_snapshots", [])
+            if len(snaps) >= 21:
+                month_ago = snaps[-21].get("total_value", total_value)
+                month_ret = (total_value / month_ago - 1) if month_ago > 0 else 0
+                if month_ret > 0.02:
+                    self.monthly_size_mult = min(1.5, self.monthly_size_mult + 0.10)
+                elif month_ret < -0.05:
+                    self.monthly_size_mult = max(0.7, self.monthly_size_mult - 0.10)
+        elif self.last_month_check is None:
+            self.last_month_check = month_start
+        self.log(f"  v38 monthly size: {self.monthly_size_mult:.2f}x")
         self.state["last_update"] = today.isoformat()
         self.state["current_week_pnl"] = week_pnl
         self.state["current_week_pct"] = week_pct
@@ -605,7 +626,7 @@ class TradingBotV15:
 
     def reset(self):
         self.log("RESET completo -> $500 cash, 0 posiciones, 0 cooldowns")
-        self.state = {"version": "v35_adaptive",
+        self.state = {"version": "v38_predictive",
                       "positions": {}, "cash": 500.0,
                       "history": [], "daily_snapshots": [],
                       "cooldowns": [],
