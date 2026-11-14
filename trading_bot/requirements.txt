@@ -9,3 +9,11 @@ matplotlib>=3.7
 reportlab>=4.0
 quantstats>=0.0.62
 scipy>=1.11
+
+transformers>=4.30
+torch>=2.0
+feedparser>=6.0
+sktime>=1.0
+mplfinance>=0.12
+statsmodels>=0.14
+hmmlearn>=0.3

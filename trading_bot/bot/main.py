@@ -55,6 +55,11 @@ from features.triple_barrier import (
 from features.options_hedge import compute_market_score
 from features.v34_extras import BoomCrashDetector, check_daily_weekly_alignment, ETF_DIVIDENDS
 from features.v38_predictive import GMMCrisis, PCAFactor, rsi_ema_vwap_filter, ewma_vol_at_date
+try:
+    from features.finbert_sentiment import FinBERTSentiment, fetch_rss_headlines, filter_headlines_by_asset
+    HAS_FINBERT = True
+except ImportError:
+    HAS_FINBERT = False
 
 
 class TradingBotV15:
@@ -309,6 +314,15 @@ class TradingBotV15:
             self._save_state()
 
     def scan_opportunities(self):
+        if self.finbert is not None:
+            today = self._today()
+            if self.news_last_fetch is None or (today - self.news_last_fetch).total_seconds() > 86400:
+                try:
+                    self.news_headlines = fetch_rss_headlines(max_per_feed=10)
+                    self.news_last_fetch = today
+                except Exception:
+                    self.news_headlines = []
+
         """Busca setups con multi-signal voting (5 capas)."""
         positions = self.state.get("positions", {})
         cash = self.state.get("cash", 0)
@@ -375,7 +389,13 @@ class TradingBotV15:
             if price <= 0:
                 continue
 
-            size_pct = self.BASE_POSITION_SIZE * size_mult
+            rsi_size = rsi_ema_vwap_filter(df, ts)
+            vol = ewma_vol_at_date(df, ts)
+            if vol > 0.30: sl_f, pt_f = 7.0, 7.0
+            elif vol < 0.15: sl_f, pt_f = 3.0, 3.0
+            else: sl_f, pt_f = self.SL_FACTOR, self.PT_FACTOR
+            if market_score < 0: sl_f = min(sl_f, 3.0)
+            size_pct = self.BASE_POSITION_SIZE * size_mult * rsi_size * self.weekly_size_mult * self.monthly_size_mult
             opportunities.append({
                 "symbol": sym, "price": price,
                 "size_pct": size_pct,
@@ -402,7 +422,7 @@ class TradingBotV15:
                                    pd.Timestamp(self._today()))
             barriers = compute_barriers(
                 opp["price"], atr_val,
-                pt_factor=self.PT_FACTOR, sl_factor=self.SL_FACTOR,
+                pt_factor=pt_f if "pt_f" in dir() else self.PT_FACTOR, sl_factor=sl_f if "sl_f" in dir() else self.SL_FACTOR,
                 max_hold_days=self.MAX_HOLD_DAYS,
             )
             qty = amount / opp["price"]
