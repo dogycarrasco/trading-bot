@@ -70,7 +70,11 @@ class TradingBotV15:
     BASE_POSITION_SIZE = 0.33
     MIN_TRADE_USD = 10
     LAMBDA_BLEND = 0.2
-    MICRO_TRADE_EPS = 0.01  # ignorar cambios < 1%  # gautierpetit: 20% cambio por ciclo
+    MICRO_TRADE_EPS = 0.01
+    TARGET_VOL = 0.20  # vol target 20% anualizado
+    VOL_SPAN = 63  # EWMA window
+    LEVERAGE_CAP = 3.0  # max leverage 3x
+    VOL_INERTIA = 0.9  # 90% previo + 10% actual (suavizar)  # ignorar cambios < 1%  # gautierpetit: 20% cambio por ciclo
     COOLDOWN_DAYS = 5
     PT_FACTOR = 5.0
     SL_FACTOR = 5.0
