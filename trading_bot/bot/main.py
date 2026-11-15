@@ -78,6 +78,16 @@ class TradingBotV15:
     CIRCUIT_BREAKER_DAYS = 30
     CIRCUIT_BREAKER_SIZE_MULT = 0.5
     BEAR_REGIME_THRESHOLD = -20
+    EXPANDED_UNIVERSE = [
+        ("BOTZ", "AMEX", "AI Robotics"),
+        ("ICLN", "AMEX", "Clean Energy"),
+        ("XBI", "AMEX", "Biotech"),
+        ("AVAXUSDT", "BINANCE", "Avalanche"),
+        ("DOTUSDT", "BINANCE", "Polkadot"),
+        ("LINKUSDT", "BINANCE", "Chainlink"),
+        ("SLV", "AMEX", "Silver"),
+        ("EEM", "AMEX", "Emerging Markets"),
+    ]
     TRAILING_TRIGGER = 0.10
     TRAILING_DROP = -0.05
 
@@ -458,7 +468,7 @@ class TradingBotV15:
         opportunities = []
         n_skipped_cooldown = 0
         n_no_signal = 0
-        for sym, _, _ in UNIVERSE_V8:
+        for sym, _, _ in UNIVERSE_V8 + getattr(self, 'EXPANDED_UNIVERSE', []):
             if sym in positions:
                 continue
             if self._cooldown_active(sym):
