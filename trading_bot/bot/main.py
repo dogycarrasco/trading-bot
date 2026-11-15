@@ -503,7 +503,8 @@ class TradingBotV15:
             elif vol < 0.15: sl_f, pt_f = 3.0, 3.0
             else: sl_f, pt_f = self.SL_FACTOR, self.PT_FACTOR
             if market_score < 0: sl_f = min(sl_f, 3.0)
-            size_pct = self.BASE_POSITION_SIZE * size_mult * rsi_size * self.weekly_size_mult * self.monthly_size_mult
+            margin_mult = max(0.33, min(1.0, (result.get("total", 3) - 2) / 3.0))
+            size_pct = self.BASE_POSITION_SIZE * size_mult * rsi_size * self.weekly_size_mult * self.monthly_size_mult * margin_mult * getattr(self, "vol_scaling", 1.0)
             opportunities.append({
                 "symbol": sym, "price": price,
                 "size_pct": size_pct,
@@ -732,6 +733,22 @@ class TradingBotV15:
         try:
             oc_vote, oc_reason = self._get_onchain_signal(self._today())
             self.log(f"  onchain: vote={oc_vote:+d} {oc_reason}")
+        except Exception:
+            pass
+        # Vol targeting con inertia (gautierpetit)
+        try:
+            snaps = self.state.get("daily_snapshots", [])
+            if len(snaps) >= 30:
+                import numpy as np
+                vals = [s.get("total_value", 500) for s in snaps[-63:]]
+                rets = [(vals[i]/vals[i-1]-1) for i in range(1, len(vals)) if vals[i-1] > 0]
+                if rets:
+                    rv = float(np.std(rets) * np.sqrt(252))
+                    if rv > 0:
+                        raw = min(self.TARGET_VOL / rv, self.LEVERAGE_CAP)
+                        self.vol_scaling = self.VOL_INERTIA * self.prev_vol_scaling + (1-self.VOL_INERTIA) * raw
+                        self.prev_vol_scaling = self.vol_scaling
+                        self.log(f"  vol target: vol={rv*100:.1f}% scale={self.vol_scaling:.2f}x")
         except Exception:
             pass
         self.log(f"  v38 monthly size: {self.monthly_size_mult:.2f}x")
