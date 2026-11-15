@@ -115,6 +115,15 @@ class TradingBotV15:
         self.hedge_manager = OptionsHedgeManager()
         self.news_headlines = []
         self.news_last_fetch = None
+        self.news_cache_path = os.path.join(ROOT, "data", "external", "news_headlines.json")
+        # Cargar headlines pre-cacheados si existen
+        if os.path.exists(self.news_cache_path):
+            try:
+                with open(self.news_cache_path) as f:
+                    self.news_headlines = json.load(f)
+                self.log(f"finBERT: {len(self.news_headlines)} headlines pre-cacheados cargados")
+            except Exception:
+                self.news_headlines = []
         self.weekly_returns_history = []
         self.dividends_collected = self.state.get('dividends_collected', 0.0)
         self.macro_features = None
@@ -318,6 +327,13 @@ class TradingBotV15:
             self._save_state()
 
     def scan_opportunities(self):
+        if self.finbert is not None and len(self.news_headlines) == 0:
+            try:
+                self.news_headlines = fetch_rss_headlines(max_per_feed=10)
+                self.news_last_fetch = self._today()
+                self.log(f"finBERT: {len(self.news_headlines)} headlines RSS cargados")
+            except Exception:
+                pass
         if self.finbert is not None:
             today = self._today()
             if self.news_last_fetch is None or (today - self.news_last_fetch).total_seconds() > 86400:
