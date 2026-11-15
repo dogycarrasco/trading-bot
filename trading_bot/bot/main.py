@@ -225,6 +225,78 @@ class TradingBotV15:
         return score
 
     # ---------- ciclo pasos ----------
+
+    def _load_onchain_data(self):
+        """Carga datos on-chain de BTC para mejorar prediccion cripto."""
+        onchain = {}
+        onchain_dir = os.path.join(ROOT, "data", "external")
+        files = {
+            "active_addresses": "btc_active_addresses.csv",
+            "hashrate": "btc_hashrate.csv",
+            "difficulty": "btc_difficulty.csv",
+            "transactions": "btc_transactions.csv",
+        }
+        for key, filename in files.items():
+            filepath = os.path.join(onchain_dir, filename)
+            if os.path.exists(filepath):
+                try:
+                    df = pd.read_csv(filepath, index_col=0, parse_dates=True)
+                    if not df.empty:
+                        onchain[key] = df
+                except Exception:
+                    pass
+        return onchain
+
+    def _get_onchain_signal(self, date):
+        """Devuelve signal on-chain real (no proxy)."""
+        if not hasattr(self, "_onchain_cache") or self._onchain_cache is None:
+            self._onchain_cache = self._load_onchain_data()
+        oc = self._onchain_cache
+        if not oc:
+            return 0, "no_onchain_data"
+        try:
+            ts = pd.Timestamp(date)
+            signal = 0
+            reasons = []
+            # Active addresses: si subiendo = adoption creciendo
+            if "active_addresses" in oc:
+                df = oc["active_addresses"]
+                sub = df.loc[:ts]
+                if len(sub) >= 30:
+                    col = df.columns[0] if len(df.columns) > 0 else None
+                    if col:
+                        recent = float(sub[col].iloc[-1])
+                        month_ago = float(sub[col].iloc[-30])
+                        if recent > month_ago:
+                            signal += 1
+                            reasons.append("addr_up")
+                        else:
+                            signal -= 1
+                            reasons.append("addr_down")
+            # Hashrate: si subiendo = mineros confiados
+            if "hashrate" in oc:
+                df = oc["hashrate"]
+                sub = df.loc[:ts]
+                if len(sub) >= 30:
+                    col = df.columns[0] if len(df.columns) > 0 else None
+                    if col:
+                        recent = float(sub[col].iloc[-1])
+                        month_ago = float(sub[col].iloc[-30])
+                        if recent > month_ago:
+                            signal += 1
+                            reasons.append("hash_up")
+                        else:
+                            signal -= 1
+                            reasons.append("hash_down")
+            # Normalizar a -1, 0, +1
+            if signal >= 2:
+                return 1, "+".join(reasons)
+            elif signal <= -2:
+                return -1, "+".join(reasons)
+            return 0, "+".join(reasons)
+        except Exception:
+            return 0, "error"
+
     def update_positions_prices(self):
         positions = self.state.get("positions", {})
         if not positions:
@@ -641,6 +713,11 @@ class TradingBotV15:
                     self.monthly_size_mult = max(0.7, self.monthly_size_mult - 0.10)
         elif self.last_month_check is None:
             self.last_month_check = month_start
+        try:
+            oc_vote, oc_reason = self._get_onchain_signal(self._today())
+            self.log(f"  onchain: vote={oc_vote:+d} {oc_reason}")
+        except Exception:
+            pass
         self.log(f"  v38 monthly size: {self.monthly_size_mult:.2f}x")
         self.state["last_update"] = today.isoformat()
         self.state["current_week_pnl"] = week_pnl
