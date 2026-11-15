@@ -52,7 +52,7 @@ from features.signal_engine import MultiSignalEngine
 from features.triple_barrier import (
     atr_at_date, compute_barriers, evaluate_trade_outcome,
 )
-from features.options_hedge import compute_market_score
+from features.options_hedge import compute_market_score, OptionsHedgeManager
 from features.v34_extras import BoomCrashDetector, check_daily_weekly_alignment, ETF_DIVIDENDS
 from features.v38_predictive import GMMCrisis, PCAFactor, rsi_ema_vwap_filter, ewma_vol_at_date
 try:
@@ -112,6 +112,7 @@ class TradingBotV15:
         self.last_month_check = None
         self.weekly_size_mult = 1.0
         self.finbert = None
+        self.hedge_manager = OptionsHedgeManager()
         self.news_headlines = []
         self.news_last_fetch = None
         self.weekly_returns_history = []
@@ -484,12 +485,37 @@ class TradingBotV15:
                      f"size reducido al {self.CIRCUIT_BREAKER_SIZE_MULT*100:.0f}% por {self.CIRCUIT_BREAKER_DAYS} dias")
         elif cb_active and total_value >= peak * 0.98:
             self.state["circuit_breaker_until"] = None
+        ms = self._get_market_score()
+        if self.hedge_manager.should_hedge(ms) and len(self.hedge_manager.positions) == 0:
+            try:
+                spy_df = load_tv_data("SPY", "")
+                if spy_df is not None and not spy_df.empty:
+                    spy_price = float(spy_df["close"].iloc[-1])
+                    self.hedge_manager.buy_put(spy_price, 25, quantity=1)
+                    self.log("  HEDGE: put virtual comprado")
+            except Exception:
+                pass
+        if len(self.hedge_manager.positions) > 0:
+            try:
+                spy_df = load_tv_data("SPY", "")
+                if spy_df is not None and not spy_df.empty:
+                    spy_price = float(spy_df["close"].iloc[-1])
+                    self.hedge_manager.update_positions(spy_price, 25)
+                    if ms >= -10:
+                        self.hedge_manager.close_all(spy_price, 25)
+                        self.log("  HEDGE: cerrado, mercado recuperado")
+            except Exception:
+                pass
             self.log(f"  Circuit breaker reseteado (recuperado a >=98% del peak)")
 
     def snapshot(self):
         """Guarda snapshot diario + reporta resultado semanal."""
         cash = self.state.get("cash", 0)
         total_value = cash + sum(p.get("value", 0) for p in self.state.get("positions", {}).values())
+        hedge_val = self.hedge_manager.total_hedge_value()
+        total_value += hedge_val
+        if hedge_val > 0:
+            self.log(f"  HEDGE valor: ${hedge_val:.2f}")
         self.log(f"Total portfolio value: ${total_value:.2f} "
                  f"(cash ${cash:.2f}, invertido ${total_value - cash:.2f})")
 
