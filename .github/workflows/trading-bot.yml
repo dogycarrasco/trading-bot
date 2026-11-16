@@ -1,4 +1,4 @@
-name: Trading Bot v32
+name: Trading Bot v38
 
 on:
   schedule:
@@ -11,17 +11,13 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  group: "bot-run"
+  cancel-in-progress: true
 
 jobs:
   run-and-deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    timeout-minutes: 15
 
     steps:
       - name: Checkout codigo
@@ -35,27 +31,22 @@ jobs:
 
       - name: Instalar dependencias
         run: |
-          pip install --quiet -r trading_bot/requirements.txt
-          pip install --quiet git+https://github.com/rongardF/tvdatafeed.git
-          pip install --quiet yfinance
+          pip install -r trading_bot/requirements.txt
+          pip install git+https://github.com/rongardF/tvdatafeed.git
+          pip install yfinance quantstats
 
-      - name: Restaurar cache de datos
-        uses: actions/cache@v4
-        with:
-          path: |
-            trading_bot/data/tv_cache/
-            trading_bot/data/external/
-          key: bot-data-${{ github.run_id }}
-          restore-keys: |
-            bot-data-
-
-      - name: Descargar datos de TradingView
+      - name: Descargar datos (tvDatafeed + yfinance fallback)
         run: |
           cd trading_bot
           python -c "
-          from tvDatafeed import TvDatafeed, Interval
-          import os
-          tv = TvDatafeed()
+          import os, yfinance as yf
+          try:
+              from tvDatafeed import TvDatafeed, Interval
+              tv = TvDatafeed()
+              has_tv = True
+          except:
+              has_tv = False
+              print('tvDatafeed no disponible, usando yfinance')
           universe = [
               ('SPY','AMEX'),('QQQ','NASDAQ'),('XLK','AMEX'),('XLF','AMEX'),('XLE','AMEX'),
               ('XLV','AMEX'),('XLY','AMEX'),('XLP','AMEX'),('XLI','AMEX'),('XLU','AMEX'),
@@ -67,58 +58,52 @@ jobs:
           os.makedirs('data/tv_cache', exist_ok=True)
           for sym, exch in universe:
               path = f'data/tv_cache/{sym}_{exch}.csv'
-              try:
-                  df = tv.get_hist(symbol=sym, exchange=exch, interval=Interval.in_daily, n_bars=5000)
-                  if df is not None and len(df) > 0:
-                      df.to_csv(path)
-                      print(f'{sym}: {len(df)} barras')
-              except Exception as e:
-                  print(f'{sym}: ERROR {e}')
+              downloaded = False
+              if has_tv:
+                  try:
+                      df = tv.get_hist(symbol=sym, exchange=exch, interval=Interval.in_daily, n_bars=5000)
+                      if df is not None and len(df) > 0:
+                          df.to_csv(path)
+                          print(f'{sym}: {len(df)} barras (TV)')
+                          downloaded = True
+                  except Exception as e:
+                      print(f'{sym}: TV ERROR {e}')
+              if not downloaded:
+                  try:
+                      t = sym.replace('USDT','-USD').replace('USD','-USD')
+                      if t.endswith('-USD-USD'): t = t[:-4]
+                      if sym == 'VIX': t = '^VIX'
+                      yd = yf.download(t, period='5y', interval='1d', progress=False)
+                      if yd is not None and not yd.empty:
+                          yd = yd.rename(columns={'Open':'open','High':'high','Low':'low','Close':'close','Volume':'volume'})
+                          if isinstance(yd.columns, pd.MultiIndex):
+                              import pandas as pd
+                              yd.columns = yd.columns.get_level_values(0)
+                          yd.to_csv(path)
+                          print(f'{sym}: {len(yd)} barras (yfinance)')
+                          downloaded = True
+                  except Exception as e:
+                      print(f'{sym}: yfinance ERROR {e}')
+              if not downloaded:
+                  print(f'{sym}: SIN DATOS')
           print('Datos descargados.')
           "
 
       - name: Ejecutar ciclo del bot
-        id: bot
-        continue-on-error: true
         run: |
           cd trading_bot
           python -m bot.main --once 2>&1 | tee ../live_run.log
 
-      - name: Asegurar que existe estado (fallback)
-        run: |
-          mkdir -p trading_bot/results
-          if [ ! -f trading_bot/results/live_state_v8.json ]; then
-            echo '{"cash":500.0,"positions":{},"history":[],"last_rebalance":null}' > trading_bot/results/live_state_v8.json
-            echo "ESTADO FALLBACK CREADO" > trading_bot/results/live_log_v8.txt
-          fi
-          if [ ! -f trading_bot/results/live_log_v8.txt ]; then
-            echo "Sin log disponible" > trading_bot/results/live_log_v8.txt
-          fi
-          cp live_run.log trading_bot/results/live_log_v8.txt 2>/dev/null || true
-
-      - name: Generar tearsheet QuantStats
-        continue-on-error: true
+      - name: Verificar estado actualizado
         run: |
           cd trading_bot
           python -c "
-          import quantstats as qs
-          import pandas as pd
           import json
-          try:
-              with open('results/live_state_v8.json') as f:
-                  state = json.load(f)
-              snapshots = state.get('daily_snapshots', [])
-              if len(snapshots) > 5:
-                  values = [s.get('total_value', 500) for s in snapshots]
-                  dates = pd.to_datetime([s.get('date') for s in snapshots])
-                  equity = pd.Series(values, index=dates)
-                  returns = equity.pct_change().dropna()
-                  qs.reports.html(returns, output='results/tearsheet.html', title='Bot v32 Live', download_images=True)
-                  print('Tearsheet generado OK')
-              else:
-                  print('Sin suficientes snapshots para tearsheet aun')
-          except Exception as e:
-              print(f'Error tearsheet: {e}')
+          with open('results/live_state_v8.json') as f:
+              state = json.load(f)
+          print(f'Estado: version={state.get(\"version\",\"?\")} total=\${state.get(\"total_value\",0):.2f} positions={len(state.get(\"positions\",{}))}')
+          if not state.get('last_update'):
+              print('WARNING: last_update vacio')
           "
 
       - name: Preparar sitio web
@@ -126,8 +111,8 @@ jobs:
           mkdir -p _site
           cp trading_bot/docs/dashboard.html _site/index.html
           cp trading_bot/results/live_state_v8.json _site/live_state_v8.json
-          cp trading_bot/results/live_log_v8.txt _site/live_log_v8.txt
-          cp trading_bot/results/tearsheet.html _site/tearsheet.html 2>/dev/null || echo "Sin tearsheet"
+          cp trading_bot/results/live_log_v8.txt _site/live_log_v8.txt 2>/dev/null || true
+          cp trading_bot/results/tearsheet.html _site/tearsheet.html 2>/dev/null || true
 
       - name: Subir artifact de Pages
         uses: actions/upload-pages-artifact@v3
@@ -138,12 +123,12 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: Guardar estado del bot (commit)
+      - name: Guardar estado (force push)
         run: |
           git config user.name "Trading Bot"
           git config user.email "bot@users.noreply.github.com"
           git add trading_bot/results/live_state_v8.json
           git add trading_bot/results/live_log_v8.txt
-          git add trading_bot/data/external/fundamentals_cache.json 2>/dev/null || true
-          git commit -m "Estado bot: $(date -u '+%Y-%m-%d %H:%M')" || echo "Nada que commitear"
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:main || echo "Push fallido"
+          git add trading_bot/data/tv_cache/ 2>/dev/null || true
+          git commit -m "Estado bot v38: $(date -u '+%Y-%m-%d %H:%M')" || echo "Nada que commitear"
+          git push --force https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:main || echo "Push fallido"
