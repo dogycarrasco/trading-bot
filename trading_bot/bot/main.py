@@ -71,6 +71,8 @@ class TradingBotV15:
     MIN_TRADE_USD = 10
     LAMBDA_BLEND = 0.2
     MICRO_TRADE_EPS = 0.01
+    TRADE_FEE_RATE = 0.001
+    RISK_VETO_DD = -0.20
     TARGET_VOL = 0.20  # vol target 20% anualizado
     VOL_SPAN = 63  # EWMA window
     LEVERAGE_CAP = 3.0  # max leverage 3x

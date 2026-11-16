@@ -4,6 +4,11 @@ import json
 import warnings
 import numpy as np
 import pandas as pd
+try:
+    import yfinance as yf
+    HAS_YF = True
+except ImportError:
+    HAS_YF = False
 
 warnings.filterwarnings("ignore")
 
