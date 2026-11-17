@@ -51,9 +51,12 @@ from backtest.run_v8_hedge_fund import (
 
 # Universo LIVE Alpaca: 12 ETFs, sin crypto
 UNIVERSE_ALPACA = [
-    ("SPY","AMEX"),("QQQ","NASDAQ"),("XLK","AMEX"),("XLF","AMEX"),
-    ("XLE","AMEX"),("XLV","AMEX"),("XLY","AMEX"),("XLP","AMEX"),
-    ("XLI","AMEX"),("XLU","AMEX"),("GLD","AMEX"),("USO","AMEX"),
+    ("SPY","AMEX","S&P 500"),("QQQ","NASDAQ","Nasdaq 100"),
+    ("XLK","AMEX","Technology"),("XLF","AMEX","Financials"),
+    ("XLE","AMEX","Energy"),("XLV","AMEX","Healthcare"),
+    ("XLY","AMEX","Consumer Disc."),("XLP","AMEX","Consumer Staples"),
+    ("XLI","AMEX","Industrials"),("XLU","AMEX","Utilities"),
+    ("GLD","AMEX","Gold"),("USO","AMEX","Oil ETF"),
 ]
 from features.signal_engine import MultiSignalEngine
 from features.triple_barrier import (
