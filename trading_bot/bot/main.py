@@ -518,7 +518,7 @@ class TradingBotV15:
             margin_mult = max(0.33, min(1.0, (result.get("total", 3) - 2) / 3.0))
             size_pct = self.BASE_POSITION_SIZE * size_mult * rsi_size * self.weekly_size_mult * self.monthly_size_mult * margin_mult * getattr(self, "vol_scaling", 1.0)
             if bear_active:
-                if result["total"] >= 4:
+                if result["total"] >= 2:
                     size_pct *= 0.5
                 else:
                     size_pct = 0

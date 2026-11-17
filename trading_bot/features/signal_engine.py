@@ -316,10 +316,25 @@ class MultiSignalEngine:
         setup_vote = self.setup.evaluate(sub)
         is_crypto = self._is_crypto(symbol)
         onchain_vote = self.onchain.evaluate(date, is_crypto=is_crypto)
+        # Trend del ACTIVO (no macro): momentum EMA50/200 + Mom20
+        closes = sub["close"]
+        if len(closes) >= 60:
+            e50 = closes.ewm(span=50, adjust=False).mean().iloc[-1]
+            e200 = closes.ewm(span=200, adjust=False).mean().iloc[-1] if len(closes) >= 200 else e50
+            last = closes.iloc[-1]
+            mom20 = last / closes.iloc[-20] - 1 if len(closes) >= 20 else 0.0
+            if last > e50 and e50 > e200 and mom20 > 0:
+                trend_vote = 1
+            elif last < e50 and e50 < e200:
+                trend_vote = -1
+            else:
+                trend_vote = 0
+        else:
+            trend_vote = macro_votes["trend"]["vote"]
         votes = {
             "regime": macro_votes["regime"]["vote"],
             "sentiment": macro_votes["sentiment"]["vote"],
-            "trend": macro_votes["trend"]["vote"],
+            "trend": trend_vote,
             "onchain": onchain_vote["vote"],
             "setup": setup_vote["vote"],
         }
