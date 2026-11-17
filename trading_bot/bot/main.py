@@ -46,7 +46,7 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 
 from backtest.run_v8_hedge_fund import (
-    UNIVERSE_ALPACA, load_tv_data, load_macro_features,
+    load_tv_data, load_macro_features,
 )
 
 # Universo LIVE Alpaca: 12 ETFs, sin crypto
