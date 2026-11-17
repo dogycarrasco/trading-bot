@@ -1,8 +1,127 @@
 {
   "version": "v38_predictive",
-  "cash": 500.0,
-  "positions": {},
-  "history": [],
+  "cash": 407.390252,
+  "positions": {
+    "XLF": {
+      "qty": 0.5672052221880836,
+      "entry_price": 58.18000030517578,
+      "current_price": 58.18000030517578,
+      "peak_price": 58.18000030517578,
+      "value": 33.0,
+      "tags": [
+        "trend_cont"
+      ],
+      "entry_date": "2026-11-17T12:28:08.550780+00:00",
+      "barriers": {
+        "tp_price": 63.99800033569336,
+        "sl_price": 55.27100028991699,
+        "max_hold": 63,
+        "atr": null,
+        "tp_pct": 0.1,
+        "sl_pct": 0.05
+      },
+      "votes": {
+        "regime": 1,
+        "sentiment": 0,
+        "trend": 1,
+        "onchain": 0,
+        "setup": 1
+      },
+      "total_votes": 3
+    },
+    "XLV": {
+      "qty": 0.16405151798470938,
+      "entry_price": 187.8800048828125,
+      "current_price": 187.8800048828125,
+      "peak_price": 187.8800048828125,
+      "value": 30.822000000000003,
+      "tags": [
+        "trend_cont"
+      ],
+      "entry_date": "2026-11-17T12:28:08.552780+00:00",
+      "barriers": {
+        "tp_price": 206.66800537109376,
+        "sl_price": 178.48600463867186,
+        "max_hold": 63,
+        "atr": null,
+        "tp_pct": 0.1,
+        "sl_pct": 0.05
+      },
+      "votes": {
+        "regime": 1,
+        "sentiment": 0,
+        "trend": 1,
+        "onchain": 0,
+        "setup": 1
+      },
+      "total_votes": 3
+    },
+    "XLY": {
+      "qty": 0.2436542329937634,
+      "entry_price": 118.1500015258789,
+      "current_price": 118.1500015258789,
+      "peak_price": 118.1500015258789,
+      "value": 28.787748,
+      "tags": [
+        "trend_cont"
+      ],
+      "entry_date": "2026-11-17T12:28:08.554666+00:00",
+      "barriers": {
+        "tp_price": 129.96500167846682,
+        "sl_price": 112.24250144958495,
+        "max_hold": 63,
+        "atr": null,
+        "tp_pct": 0.1,
+        "sl_pct": 0.05
+      },
+      "votes": {
+        "regime": 1,
+        "sentiment": 0,
+        "trend": 1,
+        "onchain": 0,
+        "setup": 1
+      },
+      "total_votes": 3
+    }
+  },
+  "history": [
+    {
+      "date": "2026-11-17T12:28:08.550867+00:00",
+      "action": "BUY",
+      "symbol": "XLF",
+      "price": 58.18000030517578,
+      "qty": 0.5672052221880836,
+      "tags": [
+        "trend_cont"
+      ],
+      "total_votes": 3,
+      "size_pct": 0.066
+    },
+    {
+      "date": "2026-11-17T12:28:08.552851+00:00",
+      "action": "BUY",
+      "symbol": "XLV",
+      "price": 187.8800048828125,
+      "qty": 0.16405151798470938,
+      "tags": [
+        "trend_cont"
+      ],
+      "total_votes": 3,
+      "size_pct": 0.066
+    },
+    {
+      "date": "2026-11-17T12:28:08.554735+00:00",
+      "action": "BUY",
+      "symbol": "XLY",
+      "price": 118.1500015258789,
+      "qty": 0.2436542329937634,
+      "tags": [
+        "trend_cont"
+      ],
+      "total_votes": 3,
+      "size_pct": 0.066
+    }
+  ],
   "daily_snapshots": [
     {
       "date": "2026-11-16T11:53:26.486827+00:00",
@@ -129,6 +248,28 @@
       "positions": {},
       "week_pnl": 0.0,
       "week_pct": 0.0
+    },
+    {
+      "date": "2026-11-17T12:28:08.555455+00:00",
+      "total_value": 500.0,
+      "cash": 407.390252,
+      "positions_count": 3,
+      "positions": {
+        "XLF": {
+          "value": 33.0,
+          "pnl_pct": 0.0
+        },
+        "XLV": {
+          "value": 30.822000000000003,
+          "pnl_pct": 0.0
+        },
+        "XLY": {
+          "value": 28.787748,
+          "pnl_pct": 0.0
+        }
+      },
+      "week_pnl": 0.0,
+      "week_pct": 0.0
     }
   ],
   "cooldowns": {},
@@ -147,7 +288,7 @@
   "monthly_size_mult": 1.0,
   "vol_scaling": 1.0,
   "total_value": 500.0,
-  "last_update": "2026-11-17T11:59:20.479323+00:00",
+  "last_update": "2026-11-17T12:28:08.555455+00:00",
   "current_week_pnl": 0.0,
   "current_week_pct": 0.0
 }
