@@ -197,7 +197,7 @@ class TradingBotV15:
 
     def _cooldown_active(self, symbol):
         cd = self.state.get("cooldowns", {})
-        until_iso = cd.get(symbol)
+        until_iso = cd.get(symbol) if isinstance(cd, dict) else None
         if not until_iso:
             return False
         try:
@@ -224,6 +224,8 @@ class TradingBotV15:
         if self.macro_features is None or self.macro_features.empty:
             return 0
         ts = pd.Timestamp(self._today())
+        if ts.tz is not None:
+            ts = ts.tz_localize(None)
         try:
             m = self.macro_features.loc[:ts]
             if m.empty:
@@ -474,6 +476,8 @@ class TradingBotV15:
 
         # Evaluar macro votes
         ts = pd.Timestamp(self._today())
+        if ts.tz is not None:
+            ts = ts.tz_localize(None)
         try:
             macro_votes = self.engine.evaluate_macro(ts)
             self.log(f"  Macro votes: regime={macro_votes['regime']['vote']:+d} "
@@ -497,7 +501,7 @@ class TradingBotV15:
                 continue
             try:
                 result = self.engine.evaluate_asset(ts, df, sym, macro_votes)
-                self.log("    %s: %s votes=%s setup_score=%s" % (sym, result["decision"], result["votes"], result["details"]["setup"].get("score", 0)))
+                self.log("    %s: %s votes=%s setup_score=%s" % (sym, result["decision"], result["votes"], result["details"].get("setup", {}).get("score", 0)))
             except Exception as e:
                 continue
             if result["decision"] != "BUY":

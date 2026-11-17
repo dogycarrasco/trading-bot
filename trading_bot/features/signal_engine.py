@@ -39,7 +39,10 @@ def _safe_loc(df, date):
     if df is None or df.empty:
         return None
     try:
-        sub = df.loc[:date]
+        d = pd.Timestamp(date)
+        if d.tz is not None:
+            d = d.tz_localize(None)
+        sub = df.loc[:d]
         return sub if not sub.empty else None
     except Exception:
         return None
