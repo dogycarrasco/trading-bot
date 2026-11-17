@@ -1,41 +1,49 @@
-[2026-11-17 12:28:08 UTC] Modo: PAPER TRADING SIMULADO (sin broker real)
-[2026-11-17 12:28:08 UTC] Capital inicial: $500.00
-[2026-11-17 12:28:08 UTC] Posiciones actuales: 0
-[2026-11-17 12:28:08 UTC] Estrategia: 5 capas votando (Regime+Sentiment+Onchain+Trend+Setup)
-[2026-11-17 12:28:08 UTC] Compra si >= 2 capas votan +1
-[2026-11-17 12:28:08 UTC] ============================================================
-[2026-11-17 12:28:08 UTC] Ciclo bot v35 ADAPTIVE
-[2026-11-17 12:28:08 UTC] ============================================================
-[2026-11-17 12:28:08 UTC] Paso 1/5: Actualizar precios de posiciones
-[2026-11-17 12:28:08 UTC] Paso 2/5: Verificar exits (triple barrier + trailing)
-[2026-11-17 12:28:08 UTC] Paso 3/5: Circuit breaker check
-
-Cargando features macro...
-[2026-11-17 12:28:08 UTC] Paso 4/5: Escanear oportunidades (5 capas votando)
-
-Cargando features macro...
-[2026-11-17 12:28:08 UTC]   Macro votes: regime=+1 sentiment=+0 trend=+1
-[2026-11-17 12:28:08 UTC]     SPY: HOLD votes={'regime': 1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 0} setup_score=0
-[2026-11-17 12:28:08 UTC]     QQQ: HOLD votes={'regime': 1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 0} setup_score=0
-[2026-11-17 12:28:08 UTC]     XLK: HOLD votes={'regime': 1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 0} setup_score=0
-[2026-11-17 12:28:08 UTC]     XLF: BUY votes={'regime': 1, 'sentiment': 0, 'trend': 1, 'onchain': 0, 'setup': 1} setup_score=2
-[2026-11-17 12:28:08 UTC]     XLE: HOLD votes={'regime': 1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 0} setup_score=0
-[2026-11-17 12:28:08 UTC]     XLV: BUY votes={'regime': 1, 'sentiment': 0, 'trend': 1, 'onchain': 0, 'setup': 1} setup_score=2
-[2026-11-17 12:28:08 UTC]     XLY: BUY votes={'regime': 1, 'sentiment': 0, 'trend': 1, 'onchain': 0, 'setup': 1} setup_score=2
-[2026-11-17 12:28:08 UTC]     XLP: BUY votes={'regime': 1, 'sentiment': 0, 'trend': 1, 'onchain': 0, 'setup': 1} setup_score=2
-[2026-11-17 12:28:08 UTC]     XLI: HOLD votes={'regime': 1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 0} setup_score=0
-[2026-11-17 12:28:08 UTC]     XLU: BUY votes={'regime': 1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 1} setup_score=2
-[2026-11-17 12:28:08 UTC]     GLD: HOLD votes={'regime': 1, 'sentiment': 0, 'trend': -1, 'onchain': 0, 'setup': 0} setup_score=0
-[2026-11-17 12:28:08 UTC]     USO: HOLD votes={'regime': 1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 0} setup_score=0
-[2026-11-17 12:28:08 UTC]   Oportunidades: 5 (skip cooldown 0, no signal 7)
-[2026-11-17 12:28:08 UTC]   COMPRA XLF: votes +3 tags ['trend_cont'] @ $58.18 qty 0.567205 = $33.00
-[2026-11-17 12:28:08 UTC]   COMPRA XLV: votes +3 tags ['trend_cont'] @ $187.88 qty 0.164052 = $30.82
-[2026-11-17 12:28:08 UTC]   COMPRA XLY: votes +3 tags ['trend_cont'] @ $118.15 qty 0.243654 = $28.79
-[2026-11-17 12:28:08 UTC] Paso 5/5: Snapshot + reporte semanal
-[2026-11-17 12:28:08 UTC] Total portfolio value: $500.00 (cash $407.39, invertido $92.61)
-[2026-11-17 12:28:08 UTC]   Esta semana (desde 2026-11-16): +$0.00 (+0.00%)
-[2026-11-17 12:28:08 UTC]   >>> Semana POSITIVA
-[2026-11-17 12:28:08 UTC]   v34 weekly size: 1.00x | dividends: $0.00
-[2026-11-17 12:28:08 UTC]   onchain: vote=+0 no_onchain_data
-[2026-11-17 12:28:08 UTC]   v38 monthly size: 1.00x
-[2026-11-17 12:28:08 UTC] Ciclo completado
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/runner/work/trading-bot/trading-bot/trading_bot/bot/main.py", line 842, in <module>
+    bot.run_cycle()
+  File "/home/runner/work/trading-bot/trading-bot/trading_bot/bot/main.py", line 790, in run_cycle
+    self.check_exits()
+  File "/home/runner/work/trading-bot/trading-bot/trading_bot/bot/main.py", line 374, in check_exits
+    df.loc[:today_ts], entry_date, pos["entry_price"], barriers,
+    ~~~~~~^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/pandas/core/indexing.py", line 1342, in __getitem__
+    return self._getitem_axis(maybe_callable, axis=axis)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/pandas/core/indexing.py", line 1914, in _getitem_axis
+    return self._get_slice_axis(key, axis=axis)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/pandas/core/indexing.py", line 1978, in _get_slice_axis
+    indexer = labels.slice_indexer(slice_obj.start, slice_obj.stop, slice_obj.step)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/pandas/core/indexes/datetimes.py", line 2316, in slice_indexer
+    return Index.slice_indexer(self, start, end, step)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 7136, in slice_indexer
+    start_slice, end_slice = self.slice_locs(start, end, step=step)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 7419, in slice_locs
+    end_slice = self.get_slice_bound(end, "right")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 7299, in get_slice_bound
+    label = self._maybe_cast_slice_bound(label, side)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/pandas/core/indexes/datetimes.py", line 2277, in _maybe_cast_slice_bound
+    self._data._assert_tzawareness_compat(label)
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/pandas/core/arrays/datetimes.py", line 780, in _assert_tzawareness_compat
+    raise TypeError(
+TypeError: Cannot compare tz-naive and tz-aware datetime-like objects.
+[2026-11-17 12:53:30 UTC] Modo: PAPER TRADING SIMULADO (sin broker real)
+[2026-11-17 12:53:30 UTC] Capital inicial: $407.39
+[2026-11-17 12:53:30 UTC] Posiciones actuales: 3
+[2026-11-17 12:53:30 UTC] Estrategia: 5 capas votando (Regime+Sentiment+Onchain+Trend+Setup)
+[2026-11-17 12:53:30 UTC] Compra si >= 2 capas votan +1
+[2026-11-17 12:53:30 UTC] ============================================================
+[2026-11-17 12:53:30 UTC] Ciclo bot v35 ADAPTIVE
+[2026-11-17 12:53:30 UTC] ============================================================
+[2026-11-17 12:53:30 UTC] Paso 1/5: Actualizar precios de posiciones
+[2026-11-17 12:53:30 UTC]   XLF: $58.18 x 0.567205 = $33.00 (P&L $+0.00, +0.00%)
+[2026-11-17 12:53:30 UTC]   XLV: $187.88 x 0.164052 = $30.82 (P&L $+0.00, +0.00%)
+[2026-11-17 12:53:30 UTC]   XLY: $118.15 x 0.243654 = $28.79 (P&L $+0.00, +0.00%)
+[2026-11-17 12:53:30 UTC] Paso 2/5: Verificar exits (triple barrier + trailing)
