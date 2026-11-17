@@ -46,8 +46,15 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 
 from backtest.run_v8_hedge_fund import (
-    UNIVERSE_V8, load_tv_data, load_macro_features,
+    UNIVERSE_ALPACA, load_tv_data, load_macro_features,
 )
+
+# Universo LIVE Alpaca: 12 ETFs, sin crypto
+UNIVERSE_ALPACA = [
+    ("SPY","AMEX"),("QQQ","NASDAQ"),("XLK","AMEX"),("XLF","AMEX"),
+    ("XLE","AMEX"),("XLV","AMEX"),("XLY","AMEX"),("XLP","AMEX"),
+    ("XLI","AMEX"),("XLU","AMEX"),("GLD","AMEX"),("USO","AMEX"),
+]
 from features.signal_engine import MultiSignalEngine
 from features.triple_barrier import (
     atr_at_date, compute_barriers, evaluate_trade_outcome,
@@ -443,11 +450,11 @@ class TradingBotV15:
             self.log(f"  {len(positions)} posiciones = max {self.MAX_POSITIONS}. No se compra.")
             return
 
-        # Bear regime filter
+        # Bear regime filter (bypass high-conviction)
         market_score = self._get_market_score()
-        if market_score < self.BEAR_REGIME_THRESHOLD:
-            self.log(f"  Bear regime (score {market_score:+.0f} < {self.BEAR_REGIME_THRESHOLD}). No comprar.")
-            return
+        bear_active = market_score < self.BEAR_REGIME_THRESHOLD
+        if bear_active:
+            self.log(f"  Bear regime (score {market_score:+.0f}). Solo high-conviction.")
 
         # Circuit breaker
         cb_until_iso = self.state.get("circuit_breaker_until")
@@ -476,7 +483,7 @@ class TradingBotV15:
         opportunities = []
         n_skipped_cooldown = 0
         n_no_signal = 0
-        for sym, _, _ in UNIVERSE_V8 + getattr(self, 'EXPANDED_UNIVERSE', []):
+        for sym, _, _ in UNIVERSE_ALPACA + getattr(self, 'EXPANDED_UNIVERSE', []):
             if sym in positions:
                 continue
             if self._cooldown_active(sym):
@@ -507,6 +514,11 @@ class TradingBotV15:
             if market_score < 0: sl_f = min(sl_f, 3.0)
             margin_mult = max(0.33, min(1.0, (result.get("total", 3) - 2) / 3.0))
             size_pct = self.BASE_POSITION_SIZE * size_mult * rsi_size * self.weekly_size_mult * self.monthly_size_mult * margin_mult * getattr(self, "vol_scaling", 1.0)
+            if bear_active:
+                if opp.get("confluence_score", 50) >= 70:
+                    size_pct *= 0.5
+                else:
+                    size_pct = 0
             opportunities.append({
                 "symbol": sym, "price": price,
                 "size_pct": size_pct,

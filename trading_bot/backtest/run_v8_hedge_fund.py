@@ -61,9 +61,9 @@ def load_tv_data(symbol, exchange):
         for exch in ["AMEX", "NASDAQ", "CME_MINI", "NYMEX", "COMEX", "FX", "BINANCE"]:
             p = os.path.join(CACHE_DIR, f"{symbol}_{exch}.csv")
             if os.path.exists(p):
-                return pd.read_csv(p, index_col=0, parse_dates=True)
+                df = pd.read_csv(p, index_col=0, parse_dates=True); df = df.dropna(subset=["close"]); return df
         return pd.DataFrame()
-    return pd.read_csv(path, index_col=0, parse_dates=True)
+    df = pd.read_csv(path, index_col=0, parse_dates=True); df = df.dropna(subset=["close"]); return df
 
 
 def load_macro_features():
