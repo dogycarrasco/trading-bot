@@ -1,6 +1,28 @@
 Traceback (most recent call last):
   File "<frozen runpy>", line 198, in _run_module_as_main
   File "<frozen runpy>", line 88, in _run_code
-  File "/home/runner/work/trading-bot/trading-bot/trading_bot/bot/main.py", line 48, in <module>
-    from backtest.run_v8_hedge_fund import (
-ImportError: cannot import name 'UNIVERSE_ALPACA' from 'backtest.run_v8_hedge_fund' (/home/runner/work/trading-bot/trading-bot/trading_bot/backtest/run_v8_hedge_fund.py)
+  File "/home/runner/work/trading-bot/trading-bot/trading_bot/bot/main.py", line 834, in <module>
+    bot.run_cycle()
+  File "/home/runner/work/trading-bot/trading-bot/trading_bot/bot/main.py", line 786, in run_cycle
+    self.scan_opportunities()
+  File "/home/runner/work/trading-bot/trading-bot/trading_bot/bot/main.py", line 486, in scan_opportunities
+    for sym, _, _ in UNIVERSE_ALPACA + getattr(self, 'EXPANDED_UNIVERSE', []):
+        ^^^^^^^^^
+ValueError: not enough values to unpack (expected 3, got 2)
+[2026-11-17 03:27:14 UTC] Modo: PAPER TRADING SIMULADO (sin broker real)
+[2026-11-17 03:27:14 UTC] Capital inicial: $500.00
+[2026-11-17 03:27:14 UTC] Posiciones actuales: 0
+[2026-11-17 03:27:14 UTC] Estrategia: 5 capas votando (Regime+Sentiment+Onchain+Trend+Setup)
+[2026-11-17 03:27:14 UTC] Compra si >= 3 capas votan +1
+[2026-11-17 03:27:14 UTC] ============================================================
+[2026-11-17 03:27:14 UTC] Ciclo bot v35 ADAPTIVE
+[2026-11-17 03:27:14 UTC] ============================================================
+[2026-11-17 03:27:14 UTC] Paso 1/5: Actualizar precios de posiciones
+[2026-11-17 03:27:14 UTC] Paso 2/5: Verificar exits (triple barrier + trailing)
+[2026-11-17 03:27:14 UTC] Paso 3/5: Circuit breaker check
+
+Cargando features macro...
+[2026-11-17 03:27:14 UTC] Paso 4/5: Escanear oportunidades (5 capas votando)
+
+Cargando features macro...
+[2026-11-17 03:27:14 UTC]   Macro votes: regime=+0 sentiment=+0 trend=-1
