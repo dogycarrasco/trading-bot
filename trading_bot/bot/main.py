@@ -91,7 +91,7 @@ class TradingBotV15:
     PT_FACTOR = 5.0
     SL_FACTOR = 5.0
     MAX_HOLD_DAYS = 63
-    MIN_VOTES = 3
+    MIN_VOTES = 2
     CIRCUIT_BREAKER_DD = -0.10
     CIRCUIT_BREAKER_DAYS = 30
     CIRCUIT_BREAKER_SIZE_MULT = 0.5
@@ -518,7 +518,7 @@ class TradingBotV15:
             margin_mult = max(0.33, min(1.0, (result.get("total", 3) - 2) / 3.0))
             size_pct = self.BASE_POSITION_SIZE * size_mult * rsi_size * self.weekly_size_mult * self.monthly_size_mult * margin_mult * getattr(self, "vol_scaling", 1.0)
             if bear_active:
-                if opp.get("confluence_score", 50) >= 70:
+                if result["total"] >= 4:
                     size_pct *= 0.5
                 else:
                     size_pct = 0

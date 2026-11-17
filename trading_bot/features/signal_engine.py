@@ -326,7 +326,7 @@ class MultiSignalEngine:
         total = sum(votes.values())
         pos = sum(1 for v in votes.values() if v == 1)
         neg = sum(1 for v in votes.values() if v == -1)
-        if total >= self.min_votes and pos >= 3:
+        if total >= self.min_votes and pos >= 2:
             decision = "BUY"
         elif total <= -self.min_votes and neg >= 3:
             decision = "SELL"
