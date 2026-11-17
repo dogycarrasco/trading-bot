@@ -34,16 +34,16 @@ Traceback (most recent call last):
   File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/pandas/core/arrays/datetimes.py", line 780, in _assert_tzawareness_compat
     raise TypeError(
 TypeError: Cannot compare tz-naive and tz-aware datetime-like objects.
-[2026-11-17 12:53:30 UTC] Modo: PAPER TRADING SIMULADO (sin broker real)
-[2026-11-17 12:53:30 UTC] Capital inicial: $407.39
-[2026-11-17 12:53:30 UTC] Posiciones actuales: 3
-[2026-11-17 12:53:30 UTC] Estrategia: 5 capas votando (Regime+Sentiment+Onchain+Trend+Setup)
-[2026-11-17 12:53:30 UTC] Compra si >= 2 capas votan +1
-[2026-11-17 12:53:30 UTC] ============================================================
-[2026-11-17 12:53:30 UTC] Ciclo bot v35 ADAPTIVE
-[2026-11-17 12:53:30 UTC] ============================================================
-[2026-11-17 12:53:30 UTC] Paso 1/5: Actualizar precios de posiciones
-[2026-11-17 12:53:30 UTC]   XLF: $58.18 x 0.567205 = $33.00 (P&L $+0.00, +0.00%)
-[2026-11-17 12:53:30 UTC]   XLV: $187.88 x 0.164052 = $30.82 (P&L $+0.00, +0.00%)
-[2026-11-17 12:53:30 UTC]   XLY: $118.15 x 0.243654 = $28.79 (P&L $+0.00, +0.00%)
-[2026-11-17 12:53:30 UTC] Paso 2/5: Verificar exits (triple barrier + trailing)
+[2026-11-17 22:07:37 UTC] Modo: PAPER TRADING SIMULADO (sin broker real)
+[2026-11-17 22:07:37 UTC] Capital inicial: $407.39
+[2026-11-17 22:07:37 UTC] Posiciones actuales: 3
+[2026-11-17 22:07:37 UTC] Estrategia: 5 capas votando (Regime+Sentiment+Onchain+Trend+Setup)
+[2026-11-17 22:07:37 UTC] Compra si >= 2 capas votan +1
+[2026-11-17 22:07:37 UTC] ============================================================
+[2026-11-17 22:07:37 UTC] Ciclo bot v35 ADAPTIVE
+[2026-11-17 22:07:37 UTC] ============================================================
+[2026-11-17 22:07:37 UTC] Paso 1/5: Actualizar precios de posiciones
+[2026-11-17 22:07:37 UTC]   XLF: $57.07 x 0.567205 = $32.37 (P&L $-0.63, -1.91%)
+[2026-11-17 22:07:37 UTC]   XLV: $185.24 x 0.164052 = $30.39 (P&L $-0.43, -1.41%)
+[2026-11-17 22:07:37 UTC]   XLY: $117.10 x 0.243654 = $28.53 (P&L $-0.26, -0.89%)
+[2026-11-17 22:07:37 UTC] Paso 2/5: Verificar exits (triple barrier + trailing)
