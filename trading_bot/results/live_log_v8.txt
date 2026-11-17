@@ -1,27 +1,27 @@
-[2026-11-17 04:06:51 UTC] Modo: PAPER TRADING SIMULADO (sin broker real)
-[2026-11-17 04:06:51 UTC] Capital inicial: $500.00
-[2026-11-17 04:06:51 UTC] Posiciones actuales: 0
-[2026-11-17 04:06:51 UTC] Estrategia: 5 capas votando (Regime+Sentiment+Onchain+Trend+Setup)
-[2026-11-17 04:06:51 UTC] Compra si >= 2 capas votan +1
-[2026-11-17 04:06:51 UTC] ============================================================
-[2026-11-17 04:06:51 UTC] Ciclo bot v35 ADAPTIVE
-[2026-11-17 04:06:51 UTC] ============================================================
-[2026-11-17 04:06:51 UTC] Paso 1/5: Actualizar precios de posiciones
-[2026-11-17 04:06:51 UTC] Paso 2/5: Verificar exits (triple barrier + trailing)
-[2026-11-17 04:06:51 UTC] Paso 3/5: Circuit breaker check
+[2026-11-17 11:18:59 UTC] Modo: PAPER TRADING SIMULADO (sin broker real)
+[2026-11-17 11:18:59 UTC] Capital inicial: $500.00
+[2026-11-17 11:18:59 UTC] Posiciones actuales: 0
+[2026-11-17 11:18:59 UTC] Estrategia: 5 capas votando (Regime+Sentiment+Onchain+Trend+Setup)
+[2026-11-17 11:18:59 UTC] Compra si >= 2 capas votan +1
+[2026-11-17 11:18:59 UTC] ============================================================
+[2026-11-17 11:18:59 UTC] Ciclo bot v35 ADAPTIVE
+[2026-11-17 11:18:59 UTC] ============================================================
+[2026-11-17 11:18:59 UTC] Paso 1/5: Actualizar precios de posiciones
+[2026-11-17 11:18:59 UTC] Paso 2/5: Verificar exits (triple barrier + trailing)
+[2026-11-17 11:18:59 UTC] Paso 3/5: Circuit breaker check
 
 Cargando features macro...
-[2026-11-17 04:06:51 UTC] Paso 4/5: Escanear oportunidades (5 capas votando)
+[2026-11-17 11:18:59 UTC] Paso 4/5: Escanear oportunidades (5 capas votando)
 
 Cargando features macro...
-[2026-11-17 04:06:51 UTC]   Macro votes: regime=+0 sentiment=+0 trend=-1
-[2026-11-17 04:06:51 UTC]   Oportunidades: 0 (skip cooldown 0, no signal 12)
-[2026-11-17 04:06:51 UTC]   Sin oportunidades BUY
-[2026-11-17 04:06:51 UTC] Paso 5/5: Snapshot + reporte semanal
-[2026-11-17 04:06:51 UTC] Total portfolio value: $500.00 (cash $500.00, invertido $0.00)
-[2026-11-17 04:06:51 UTC]   Esta semana (desde 2026-11-16): +$0.00 (+0.00%)
-[2026-11-17 04:06:51 UTC]   >>> Semana POSITIVA
-[2026-11-17 04:06:51 UTC]   v34 weekly size: 1.00x | dividends: $0.00
-[2026-11-17 04:06:51 UTC]   onchain: vote=+0 no_onchain_data
-[2026-11-17 04:06:51 UTC]   v38 monthly size: 1.00x
-[2026-11-17 04:06:51 UTC] Ciclo completado
+[2026-11-17 11:18:59 UTC]   Macro votes: regime=+0 sentiment=+0 trend=-1
+[2026-11-17 11:18:59 UTC]   Oportunidades: 0 (skip cooldown 0, no signal 12)
+[2026-11-17 11:18:59 UTC]   Sin oportunidades BUY
+[2026-11-17 11:18:59 UTC] Paso 5/5: Snapshot + reporte semanal
+[2026-11-17 11:18:59 UTC] Total portfolio value: $500.00 (cash $500.00, invertido $0.00)
+[2026-11-17 11:18:59 UTC]   Esta semana (desde 2026-11-16): +$0.00 (+0.00%)
+[2026-11-17 11:18:59 UTC]   >>> Semana POSITIVA
+[2026-11-17 11:18:59 UTC]   v34 weekly size: 1.00x | dividends: $0.00
+[2026-11-17 11:18:59 UTC]   onchain: vote=+0 no_onchain_data
+[2026-11-17 11:18:59 UTC]   v38 monthly size: 1.00x
+[2026-11-17 11:18:59 UTC] Ciclo completado
