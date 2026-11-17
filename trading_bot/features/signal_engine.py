@@ -261,6 +261,8 @@ class SetupSignal:
             tags.append("oversold")
         if r_prev < 30 and last > float(close.iloc[-2]):
             tags.append("oversold_bounce")
+        if last > ma_20 and ma_20 > ma_20_prev and 45 <= r_last <= 72:
+            tags.append("trend_cont")
         metrics = {"rsi": r_last, "high_20": hi_20, "ma_20": ma_20, "vol_ratio": vol_ratio, "price": last}
         return tags, metrics
 
@@ -271,10 +273,11 @@ class SetupSignal:
         if "reclaim_ma20" in tags: s += 2
         if "oversold_bounce" in tags: s += 2
         if "oversold" in tags: s += 1
+        if "trend_cont" in tags: s += 2
         if metrics.get("vol_ratio", 0) > 2.0: s += 1
         return s
 
-    def evaluate(self, df_to_date, min_score=4):
+    def evaluate(self, df_to_date, min_score=2):
         if df_to_date is None or len(df_to_date) < 25:
             return {"vote": 0, "confidence": 0, "reason": "no_history", "tags": [], "score": 0}
         tags, metrics = self.find_setups(df_to_date)

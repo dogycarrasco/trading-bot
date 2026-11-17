@@ -497,6 +497,7 @@ class TradingBotV15:
                 continue
             try:
                 result = self.engine.evaluate_asset(ts, df, sym, macro_votes)
+                self.log("    %s: %s votes=%s setup_score=%s" % (sym, result["decision"], result["votes"], result["details"]["setup"].get("score", 0)))
             except Exception as e:
                 continue
             if result["decision"] != "BUY":
