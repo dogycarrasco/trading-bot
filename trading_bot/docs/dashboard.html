@@ -302,12 +302,12 @@ table tr:hover { background: rgba(88, 166, 255, 0.05); }
 <div class="section">
   <h2>ℹ️ Cómo funciona</h2>
   <div class="strategy-info">
-    <strong>Estrategia actual:</strong> Multi-signal voting (5 capas). El bot evalúa 5 señales (Regime, Sentiment, Onchain, Trend, Setup) y solo compra si ≥3 de 5 votan +1. Vende por triple-barrier (ATR-based) o trailing stop.
+    <strong>Estrategia actual (v35 ADAPTIVE):</strong> Doble motor. (1) Multi-signal voting: 5 señales (Regime, Sentiment, Onchain, Trend del activo, Setup trend_cont) — compra si ≥2 de 5 votan +1. (2) Sleeve Williams %R(2): cuando SPY entra en sobreventa extrema (W%R < −90), compra con 50% del cash libre para capturar el rebote. Salidas: triple-barrier, trailing stop 8%, o reglas Williams para el sleeve. Universo: 12 ETFs de Alpaca (sin crypto).
   </div>
   <div style="font-size: 13px; color: var(--text-muted); line-height: 1.7;">
-    <p><strong>📊 Backtest:</strong> antes de deployar, el sistema probó la estrategia con 18 años de datos históricos (2007-2026). Resultado: CAGR +11.33% vs SPY +8.58%, win rate semanal 44.9% vs SPY 14.6%.</p>
-    <p><strong>🔄 Paper trading:</strong> simula trades con $500 virtuales. No usa dinero real. Cada 2 horas GitHub Actions ejecuta un ciclo: descarga precios → evalúa signals → compra/vende según estrategia → actualiza este dashboard.</p>
-    <p><strong>🧠 Aprendizaje:</strong> el bot guarda el historial de trades cerrados. Con suficiente historia, entrena un meta-modelo (LightGBM) que filtra señales malas (conviction gating).</p>
+    <p><strong>📊 Backtest (walk-forward 19.7 años, 2007-2026):</strong> el híbrido (motor de votos + sleeve Williams) logró Calmar 0.42/0.99/1.23 en train/val/test — consistente a través de crisis 2008, COVID y bull 2023-26. CAGR: +7.0% (train) / +15.0% (val) / +13.0% (test). MaxDD nunca peor a −16.7% (SPY: −55% en 2008). El Calmar (CAGR/|MaxDD|) es la métrica reina: retorno por unidad de riesgo.</p>
+    <p><strong>🔄 Paper trading:</strong> simula trades con $500 virtuales. No usa dinero real. Cada 2 horas GitHub Actions ejecuta un ciclo: descarga precios (tvDatafeed + yfinance fallback) → evalúa signals → compra/vende → actualiza este dashboard. Un guard CI (smoke test) verifica cada ciclo: si el bot crashea, no evalúa, o no completa, el workflow falla en rojo — nunca un dashboard verde con el bot ciego.</p>
+    <p><strong>🧠 Aprendizaje:</strong> el bot guarda el historial de trades cerrados y re-diaria los pesos (adaptive weights). El margin_mult escala el size según el número de votos: 2 votos → size 0.33x, 4+ votos → 0.7x. El weekly/monthly compounding sube el size si las semanas van positivas.</p>
     <p><strong>📈 Métricas clave:</strong></p>
     <ul style="margin-left: 20px; margin-top: 8px;">
       <li><strong>Capital total:</strong> cash + valor de posiciones</li>
