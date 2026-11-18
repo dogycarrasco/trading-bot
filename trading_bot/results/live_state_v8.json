@@ -1,6 +1,6 @@
 {
   "version": "v38_predictive",
-  "cash": 407.390252,
+  "cash": 190.251247684,
   "positions": {
     "XLF": {
       "qty": 0.5672052221880836,
@@ -34,7 +34,7 @@
       "entry_price": 187.8800048828125,
       "current_price": 187.8800048828125,
       "peak_price": 187.8800048828125,
-      "value": 30.822000000000003,
+      "value": 30.822,
       "tags": [
         "trend_cont"
       ],
@@ -82,6 +82,43 @@
         "setup": 1
       },
       "total_votes": 3
+    },
+    "SPY": {
+      "qty": 0.27500699711734705,
+      "entry_price": 739.9500122070312,
+      "current_price": 739.9500122070312,
+      "peak_price": 739.9500122070312,
+      "value": 203.695126,
+      "entry_date": "2026-11-18T01:31:03.979584",
+      "strategy": "williams_sleeve",
+      "prev_high": 760.1199951171875
+    },
+    "XLP": {
+      "qty": 0.14518227362344027,
+      "entry_price": 92.5999984741211,
+      "current_price": 92.5999984741211,
+      "peak_price": 92.5999984741211,
+      "value": 13.443878316,
+      "tags": [
+        "trend_cont"
+      ],
+      "entry_date": "2026-11-18T01:31:03.981691",
+      "barriers": {
+        "tp_price": 97.00511452654229,
+        "sl_price": 88.1948824216999,
+        "max_hold": 63,
+        "atr": 1.468372017473729,
+        "tp_pct": 0.04757144843422756,
+        "sl_pct": -0.04757144843422745
+      },
+      "votes": {
+        "regime": 1,
+        "sentiment": 0,
+        "trend": 1,
+        "onchain": 0,
+        "setup": 1
+      },
+      "total_votes": 3
     }
   },
   "history": [
@@ -115,6 +152,18 @@
       "symbol": "XLY",
       "price": 118.1500015258789,
       "qty": 0.2436542329937634,
+      "tags": [
+        "trend_cont"
+      ],
+      "total_votes": 3,
+      "size_pct": 0.066
+    },
+    {
+      "date": "2026-11-18T01:31:03.981758",
+      "action": "BUY",
+      "symbol": "XLP",
+      "price": 92.5999984741211,
+      "qty": 0.14518227362344027,
       "tags": [
         "trend_cont"
       ],
@@ -270,6 +319,36 @@
       },
       "week_pnl": 0.0,
       "week_pct": 0.0
+    },
+    {
+      "date": "2026-11-18T01:31:03.982242",
+      "total_value": 500.0,
+      "cash": 190.251247684,
+      "positions_count": 5,
+      "positions": {
+        "XLF": {
+          "value": 33.0,
+          "pnl_pct": 0.0
+        },
+        "XLV": {
+          "value": 30.822,
+          "pnl_pct": 0.0
+        },
+        "XLY": {
+          "value": 28.787748,
+          "pnl_pct": 0.0
+        },
+        "SPY": {
+          "value": 203.695126,
+          "pnl_pct": 0.0
+        },
+        "XLP": {
+          "value": 13.443878316,
+          "pnl_pct": 0.0
+        }
+      },
+      "week_pnl": 0.0,
+      "week_pct": 0.0
     }
   ],
   "cooldowns": {},
@@ -288,7 +367,7 @@
   "monthly_size_mult": 1.0,
   "vol_scaling": 1.0,
   "total_value": 500.0,
-  "last_update": "2026-11-17T12:28:08.555455+00:00",
+  "last_update": "2026-11-18T01:31:03.982242",
   "current_week_pnl": 0.0,
   "current_week_pct": 0.0
 }
