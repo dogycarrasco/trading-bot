@@ -712,6 +712,11 @@ class TradingBotV15:
         if monday_value is None:
             monday_value = self.state.get("peak_equity", total_value)
 
+        # Sanity check anti-corrupcion: total debe ser cash + posiciones reales
+        real_total = cash + sum(p.get("value", 0) for p in self.state.get("positions", {}).values())
+        if abs(total_value - real_total) > max(1.0, real_total * 0.01):
+            self.log(f"  WARNING: total_value {total_value:.2f} != cash+posiciones {real_total:.2f}. Corrigiendo.")
+            total_value = real_total
         week_pnl = total_value - monday_value
         week_pct = (total_value / monday_value - 1) * 100 if monday_value > 0 else 0
         week_sign = "+" if week_pnl >= 0 else ""

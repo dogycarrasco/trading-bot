@@ -83,6 +83,16 @@ jobs:
           EVALS=$(grep -cE "UTC\\]     [A-Z]+: (BUY|HOLD|SELL)" live_run.log || echo 0)
           if [ "$EVALS" -lt 5 ]; then echo "::error::solo $EVALS activos (<5)"; exit 1; fi
           echo "Smoke OK: $EVALS activos, ciclo completo"
+          python -c "
+          import json, sys
+          s = json.load(open('trading_bot/results/live_state_v8.json'))
+          t = s.get('total_value', 0)
+          c = s.get('cash', 0)
+          v = sum(p.get('value', 0) for p in s.get('positions', {}).values())
+          if abs(t - (c + v)) > max(1.0, (c + v) * 0.01):
+              print(f'::error::total_value {t:.2f} != cash+posiciones {c+v:.2f}'); sys.exit(1)
+          print(f'JSON consistente: total={t:.2f}')
+          "
 
       - name: Fallback state
         run: |
