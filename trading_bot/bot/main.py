@@ -376,6 +376,10 @@ class TradingBotV15:
                 self.state["cash"] += proceeds
                 pnl = proceeds - pos["qty"] * pos["entry_price"]
                 self.log(f"  SLEEVE SELL {sym} px={px:.2f} wr2={wr2:.0f} pnl={pnl:+.2f}")
+                try:
+                    self._record_trade_memory(sym, pos, px, "williams_exit", pnl)
+                except Exception:
+                    pass
                 del positions[sym]
 
         for sym, pos in positions.items():
@@ -435,6 +439,10 @@ class TradingBotV15:
             self.state["cash"] = self.state.get("cash", 0) + qty * exit_price
             self.log(f"  VENTA {sym}: {reason} @ ${exit_price:.2f} (entry ${entry:.2f}) "
                      f"P&L ${pnl:+.2f} -> cash ${self.state['cash']:.2f}")
+            try:
+                self._record_trade_memory(sym, pos, exit_price, reason, pnl)
+            except Exception as _e:
+                self.log(f"  MEMORIA warn: {_e}")
 
             if reason == "SL":
                 self._set_cooldown(sym)
@@ -451,6 +459,63 @@ class TradingBotV15:
 
         if to_sell:
             self._save_state()
+
+    def _record_trade_memory(self, sym, pos, exit_price, reason, pnl):
+        """Trader-memory-core: diario persistente + signal post-mortem por capa."""
+        mem_path = os.path.join(ROOT, "results", "trade_memory.json")
+        mem = {}
+        if os.path.exists(mem_path):
+            try:
+                mem = json.load(open(mem_path))
+            except Exception:
+                mem = {}
+        trades = mem.setdefault("closed_trades", [])
+        entry = pos.get("entry_price", exit_price) or exit_price
+        votes = pos.get("votes", {})
+        trades.append({
+            "symbol": sym,
+            "strategy": pos.get("strategy", "votes"),
+            "entry_date": pos.get("entry_date", ""),
+            "exit_date": self._today().isoformat(),
+            "entry_price": entry,
+            "exit_price": exit_price,
+            "pnl": round(pnl, 4),
+            "pnl_pct": round((exit_price / entry - 1) * 100, 2) if entry else 0,
+            "exit_reason": reason,
+            "votes_at_entry": votes,
+            "votes_yes": sum(1 for v in votes.values() if v == 1),
+        })
+        if len(trades) > 500:
+            mem["closed_trades"] = trades[-500:]
+        wins = [t for t in trades if t["pnl"] > 0]
+        losses = [t for t in trades if t["pnl"] <= 0]
+        layers = ["regime", "sentiment", "trend", "onchain", "setup"]
+        layer_stats = {}
+        for layer in layers:
+            approved = [t for t in trades if t["votes_at_entry"].get(layer) == 1]
+            wr = (sum(1 for t in approved if t["pnl"] > 0) / len(approved) * 100) if approved else None
+            layer_stats[layer] = {
+                "aprobo_en": len(approved),
+                "win_rate_si_aprobo": round(wr, 1) if wr is not None else None,
+            }
+        mem["post_mortem"] = {
+            "total_trades": len(trades),
+            "wins": len(wins),
+            "losses": len(losses),
+            "win_rate": round(len(wins) / len(trades) * 100, 1) if trades else 0,
+            "layer_stats": layer_stats,
+        }
+        with open(mem_path, "w") as f:
+            json.dump(mem, f, indent=2)
+        pm = mem["post_mortem"]
+        self.log(f"  MEMORIA: {pm['total_trades']} trades cerrados | win rate {pm['win_rate']:.0f}%")
+        partes = []
+        for layer in ("regime", "trend", "setup"):
+            s = layer_stats[layer]
+            if s["win_rate_si_aprobo"] is not None:
+                partes.append(f"{layer} {s['win_rate_si_aprobo']:.0f}%")
+        if partes:
+            self.log(f"  POST-MORTEM (WR cuando la capa aprobo): {' | '.join(partes)}")
 
     def scan_opportunities(self):
         if self.finbert is not None and len(self.news_headlines) == 0:
