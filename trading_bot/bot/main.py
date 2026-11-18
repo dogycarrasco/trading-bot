@@ -193,7 +193,7 @@ class TradingBotV15:
 
     # ---------- helpers ----------
     def _today(self):
-        return datetime.now(timezone.utc)
+        return datetime.now(timezone.utc).replace(tzinfo=None)
 
     def _cooldown_active(self, symbol):
         cd = self.state.get("cooldowns", {})
@@ -356,7 +356,31 @@ class TradingBotV15:
         today_ts = pd.Timestamp(today)
         to_sell = []
 
+        # SLEEVE Williams: salida por reglas propias
+        for sym, pos in list(positions.items()):
+            if pos.get("strategy") != "williams_sleeve":
+                continue
+            df_w = load_tv_data(sym, "")
+            if df_w.empty:
+                continue
+            sub_w = df_w.loc[:today_ts] if today_ts in df_w.index else df_w
+            if len(sub_w) < 2:
+                continue
+            prev_high = pos.get("prev_high", float(sub_w["high"].iloc[-2]))
+            px = float(sub_w["close"].iloc[-1])
+            hh = float(sub_w["high"].iloc[-2:].max())
+            ll = float(sub_w["low"].iloc[-2:].min())
+            wr2 = -100 * (hh - px) / (hh - ll) if (hh - ll) > 0 else -50
+            if px > prev_high or wr2 > -30:
+                proceeds = pos["qty"] * px * (1 - 0.001)
+                self.state["cash"] += proceeds
+                pnl = proceeds - pos["qty"] * pos["entry_price"]
+                self.log(f"  SLEEVE SELL {sym} px={px:.2f} wr2={wr2:.0f} pnl={pnl:+.2f}")
+                del positions[sym]
+
         for sym, pos in positions.items():
+            if pos.get("strategy") == "williams_sleeve":
+                continue
             df = load_tv_data(sym, "")
             if df.empty:
                 continue
@@ -543,6 +567,30 @@ class TradingBotV15:
             return
 
         # Ordenar por total votes (más votos = mejor)
+        # SLEEVE Williams %R(2) sobre SPY con cash ocioso (validado 19.7 anos)
+        if "SPY" not in positions and cash > 50:
+            df_spy = load_tv_data("SPY", "")
+            if not df_spy.empty and len(df_spy) >= 3:
+                sub_spy = df_spy.loc[:ts] if ts in df_spy.index else df_spy
+                if len(sub_spy) >= 3:
+                    hh = float(sub_spy["high"].iloc[-2:].max())
+                    ll = float(sub_spy["low"].iloc[-2:].min())
+                    sc = float(sub_spy["close"].iloc[-1])
+                    if hh > ll:
+                        wr2 = -100 * (hh - sc) / (hh - ll)
+                        if wr2 < -90:
+                            amt = cash * 0.5
+                            qty = amt * (1 - 0.001) / sc
+                            self.state["cash"] -= amt
+                            positions["SPY"] = {
+                                "qty": qty, "entry_price": sc, "current_price": sc,
+                                "peak_price": sc, "value": amt,
+                                "entry_date": self._today().isoformat(),
+                                "strategy": "williams_sleeve",
+                                "prev_high": float(sub_spy["high"].iloc[-2]),
+                            }
+                            self.log(f"  SLEEVE COMPRA SPY (Williams%R(2)={wr2:.0f}) @ ${sc:.2f} = ${amt:.2f}")
+
         opportunities.sort(key=lambda x: -x["total"])
         slots = self.MAX_POSITIONS - len(positions)
         for opp in opportunities[:slots]:
