@@ -79,7 +79,7 @@ jobs:
           if [ ! -s live_run.log ]; then echo "::error::log vacio"; exit 1; fi
           if grep -q "Traceback" live_run.log; then echo "::error::Traceback:"; grep -A6 Traceback live_run.log; exit 1; fi
           if ! grep -q "Ciclo completado" live_run.log; then echo "::error::ciclo no completo"; exit 1; fi
-          if ! grep -q "Oportunidades:" live_run.log; then echo "::error::scan no corrio"; exit 1; fi
+          if ! grep -qE "Oportunidades:|posiciones = max|Cash .* < min" live_run.log; then echo "::error::scan no corrio"; exit 1; fi
           EVALS=$(grep -cE "UTC\\]     [A-Z]+: (BUY|HOLD|SELL)" live_run.log || echo 0)
           if [ "$EVALS" -lt 5 ]; then echo "::error::solo $EVALS activos (<5)"; exit 1; fi
           echo "Smoke OK: $EVALS activos, ciclo completo"

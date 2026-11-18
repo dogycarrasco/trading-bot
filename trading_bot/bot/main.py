@@ -76,7 +76,7 @@ class TradingBotV15:
     """Bot v15 multi-signal para paper trading live."""
 
     # Parametros (mismos del backtest v15)
-    MAX_POSITIONS = 3
+    MAX_POSITIONS = 5
     BASE_POSITION_SIZE = 0.33
     MIN_TRADE_USD = 10
     LAMBDA_BLEND = 0.2
