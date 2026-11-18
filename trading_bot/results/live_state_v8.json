@@ -5,9 +5,9 @@
     "XLF": {
       "qty": 0.5672052221880836,
       "entry_price": 58.18000030517578,
-      "current_price": 58.18000030517578,
+      "current_price": 57.06999969482422,
       "peak_price": 58.18000030517578,
-      "value": 33.0,
+      "value": 32.37040185717663,
       "tags": [
         "trend_cont"
       ],
@@ -32,9 +32,9 @@
     "XLV": {
       "qty": 0.16405151798470938,
       "entry_price": 187.8800048828125,
-      "current_price": 187.8800048828125,
+      "current_price": 185.24000549316406,
       "peak_price": 187.8800048828125,
-      "value": 30.822,
+      "value": 30.38890409264947,
       "tags": [
         "trend_cont"
       ],
@@ -59,9 +59,9 @@
     "XLY": {
       "qty": 0.2436542329937634,
       "entry_price": 118.1500015258789,
-      "current_price": 118.1500015258789,
+      "current_price": 117.0999984741211,
       "peak_price": 118.1500015258789,
-      "value": 28.787748,
+      "value": 28.53191031178284,
       "tags": [
         "trend_cont"
       ],
@@ -86,9 +86,9 @@
     "SPY": {
       "qty": 0.27500699711734705,
       "entry_price": 739.9500122070312,
-      "current_price": 739.9500122070312,
+      "current_price": 732.4400024414062,
       "peak_price": 739.9500122070312,
-      "value": 203.695126,
+      "value": 201.4261256400335,
       "entry_date": "2026-11-18T01:31:03.979584",
       "strategy": "williams_sleeve",
       "prev_high": 760.1199951171875
@@ -96,9 +96,9 @@
     "XLP": {
       "qty": 0.14518227362344027,
       "entry_price": 92.5999984741211,
-      "current_price": 92.5999984741211,
+      "current_price": 91.45999908447266,
       "peak_price": 92.5999984741211,
-      "value": 13.443878316,
+      "value": 13.278370612681506,
       "tags": [
         "trend_cont"
       ],
@@ -349,6 +349,36 @@
       },
       "week_pnl": 0.0,
       "week_pct": 0.0
+    },
+    {
+      "date": "2026-11-18T03:24:52.805198",
+      "total_value": 496.2469601983239,
+      "cash": 190.251247684,
+      "positions_count": 5,
+      "positions": {
+        "XLF": {
+          "value": 32.37040185717663,
+          "pnl_pct": -1.9078731600708054
+        },
+        "XLV": {
+          "value": 30.38890409264947,
+          "pnl_pct": -1.4051518634434212
+        },
+        "XLY": {
+          "value": 28.53191031178284,
+          "pnl_pct": -0.8887033755372586
+        },
+        "SPY": {
+          "value": 201.4261256400335,
+          "pnl_pct": -1.0149347444734946
+        },
+        "XLP": {
+          "value": 13.278370612681506,
+          "pnl_pct": -1.2311008730383821
+        }
+      },
+      "week_pnl": -3.7530398016760955,
+      "week_pct": -0.7506079603352145
     }
   ],
   "cooldowns": {},
@@ -356,9 +386,9 @@
     {
       "week": "2026-11-16",
       "start_value": 500.0,
-      "current_value": 500.0,
-      "current_pnl": 0.0,
-      "current_pct": 0.0
+      "current_value": 496.2469601983239,
+      "current_pnl": -3.7530398016760955,
+      "current_pct": -0.7506079603352145
     }
   ],
   "peak_equity": 500.0,
@@ -366,8 +396,8 @@
   "dividends_collected": 0.0,
   "monthly_size_mult": 1.0,
   "vol_scaling": 1.0,
-  "total_value": 500.0,
-  "last_update": "2026-11-18T01:31:03.982242",
-  "current_week_pnl": 0.0,
-  "current_week_pct": 0.0
+  "total_value": 496.2469601983239,
+  "last_update": "2026-11-18T03:24:52.805198",
+  "current_week_pnl": -3.7530398016760955,
+  "current_week_pct": -0.7506079603352145
 }
