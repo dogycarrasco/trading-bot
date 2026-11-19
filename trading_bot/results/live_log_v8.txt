@@ -1,32 +1,32 @@
-[2026-11-18 23:28:47 UTC] Modo: PAPER TRADING SIMULADO (sin broker real)
-[2026-11-18 23:28:47 UTC] Capital inicial: $190.25
-[2026-11-18 23:28:47 UTC] Posiciones actuales: 5
-[2026-11-18 23:28:47 UTC] Estrategia: 5 capas votando (Regime+Sentiment+Onchain+Trend+Setup)
-[2026-11-18 23:28:47 UTC] Compra si >= 2 capas votan +1
-[2026-11-18 23:28:47 UTC] ============================================================
-[2026-11-18 23:28:47 UTC] Ciclo bot v35 ADAPTIVE
-[2026-11-18 23:28:47 UTC] ============================================================
-[2026-11-18 23:28:47 UTC] Paso 1/5: Actualizar precios de posiciones
-[2026-11-18 23:28:47 UTC]   XLF: $56.42 x 0.567205 = $32.00 (P&L $-1.00, -3.03%)
-[2026-11-18 23:28:47 UTC]   XLV: $181.17 x 0.164052 = $29.72 (P&L $-1.10, -3.57%)
-[2026-11-18 23:28:47 UTC]   XLY: $119.20 x 0.243654 = $29.04 (P&L $+0.26, +0.89%)
-[2026-11-18 23:28:47 UTC]   SPY: $730.20 x 0.275007 = $200.81 (P&L $-2.68, -1.32%)
-[2026-11-18 23:28:47 UTC]   XLP: $91.18 x 0.145182 = $13.24 (P&L $-0.21, -1.53%)
-[2026-11-18 23:28:47 UTC] Paso 2/5: Verificar exits (triple barrier + trailing)
-[2026-11-18 23:28:47 UTC] Paso 3/5: Circuit breaker check
+[2026-11-19 00:01:52 UTC] Modo: PAPER TRADING SIMULADO (sin broker real)
+[2026-11-19 00:01:52 UTC] Capital inicial: $190.25
+[2026-11-19 00:01:52 UTC] Posiciones actuales: 5
+[2026-11-19 00:01:52 UTC] Estrategia: 5 capas votando (Regime+Sentiment+Onchain+Trend+Setup)
+[2026-11-19 00:01:52 UTC] Compra si >= 2 capas votan +1
+[2026-11-19 00:01:52 UTC] ============================================================
+[2026-11-19 00:01:52 UTC] Ciclo bot v35 ADAPTIVE
+[2026-11-19 00:01:52 UTC] ============================================================
+[2026-11-19 00:01:52 UTC] Paso 1/5: Actualizar precios de posiciones
+[2026-11-19 00:01:52 UTC]   XLF: $56.42 x 0.567205 = $32.00 (P&L $-1.00, -3.03%)
+[2026-11-19 00:01:52 UTC]   XLV: $181.17 x 0.164052 = $29.72 (P&L $-1.10, -3.57%)
+[2026-11-19 00:01:52 UTC]   XLY: $119.20 x 0.243654 = $29.04 (P&L $+0.26, +0.89%)
+[2026-11-19 00:01:52 UTC]   SPY: $730.20 x 0.275007 = $200.81 (P&L $-2.68, -1.32%)
+[2026-11-19 00:01:52 UTC]   XLP: $91.18 x 0.145182 = $13.24 (P&L $-0.21, -1.53%)
+[2026-11-19 00:01:52 UTC] Paso 2/5: Verificar exits (triple barrier + trailing)
+[2026-11-19 00:01:52 UTC] Paso 3/5: Circuit breaker check
 
 Cargando features macro...
-[2026-11-18 23:28:47 UTC]   HEDGE: put virtual comprado
-[2026-11-18 23:28:47 UTC]   Circuit breaker reseteado (recuperado a >=98% del peak)
-[2026-11-18 23:28:47 UTC] Paso 4/5: Escanear oportunidades (5 capas votando)
-[2026-11-18 23:28:47 UTC]   5 posiciones = max 5. No se compra.
-[2026-11-18 23:28:47 UTC] Paso 5/5: Snapshot + reporte semanal
-[2026-11-18 23:28:47 UTC]   HEDGE valor: $624.57
-[2026-11-18 23:28:47 UTC] Total portfolio value: $1119.64 (cash $190.25, invertido $929.38)
-[2026-11-18 23:28:47 UTC]   WARNING: total_value 1119.64 != cash+posiciones 495.07. Corrigiendo.
-[2026-11-18 23:28:47 UTC]   Esta semana (desde 2026-11-16): $-4.93 (-0.99%)
-[2026-11-18 23:28:47 UTC]   >>> Semana NEGATIVA
-[2026-11-18 23:28:47 UTC]   v34 weekly size: 1.00x | dividends: $0.00
-[2026-11-18 23:28:47 UTC]   onchain: vote=+0 no_onchain_data
-[2026-11-18 23:28:47 UTC]   v38 monthly size: 1.00x
-[2026-11-18 23:28:47 UTC] Ciclo completado
+[2026-11-19 00:01:52 UTC]   HEDGE: put virtual comprado
+[2026-11-19 00:01:52 UTC]   Circuit breaker reseteado (recuperado a >=98% del peak)
+[2026-11-19 00:01:52 UTC] Paso 4/5: Escanear oportunidades (5 capas votando)
+[2026-11-19 00:01:52 UTC]   5 posiciones = max 5. No se compra.
+[2026-11-19 00:01:52 UTC] Paso 5/5: Snapshot + reporte semanal
+[2026-11-19 00:01:52 UTC]   HEDGE valor: $624.57
+[2026-11-19 00:01:52 UTC] Total portfolio value: $1119.64 (cash $190.25, invertido $929.38)
+[2026-11-19 00:01:52 UTC]   WARNING: total_value 1119.64 != cash+posiciones 495.07. Corrigiendo.
+[2026-11-19 00:01:52 UTC]   Esta semana (desde 2026-11-16): $-4.93 (-0.99%)
+[2026-11-19 00:01:52 UTC]   >>> Semana NEGATIVA
+[2026-11-19 00:01:52 UTC]   v34 weekly size: 1.00x | dividends: $0.00
+[2026-11-19 00:01:52 UTC]   onchain: vote=+0 no_onchain_data
+[2026-11-19 00:01:52 UTC]   v38 monthly size: 1.00x
+[2026-11-19 00:01:52 UTC] Ciclo completado
