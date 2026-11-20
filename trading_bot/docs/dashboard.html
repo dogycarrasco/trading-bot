@@ -299,25 +299,6 @@ table tr:hover { background: rgba(88, 166, 255, 0.05); }
   </div>
 </div>
 
-<div class="section">
-  <h2>ℹ️ Cómo funciona</h2>
-  <div class="strategy-info">
-    <strong>Estrategia actual (v35 ADAPTIVE):</strong> Doble motor. (1) Multi-signal voting: 5 señales (Regime, Sentiment, Onchain, Trend del activo, Setup trend_cont) — compra si ≥2 de 5 votan +1. (2) Sleeve Williams %R(2): cuando SPY entra en sobreventa extrema (W%R < −90), compra con 50% del cash libre para capturar el rebote. Salidas: triple-barrier, trailing stop 8%, o reglas Williams para el sleeve. Universo: 12 ETFs de Alpaca (sin crypto).
-  </div>
-  <div style="font-size: 13px; color: var(--text-muted); line-height: 1.7;">
-    <p><strong>📊 Backtest (walk-forward 19.7 años, 2007-2026):</strong> el híbrido (motor de votos + sleeve Williams) logró Calmar 0.42/0.99/1.23 en train/val/test — consistente a través de crisis 2008, COVID y bull 2023-26. CAGR: +7.0% (train) / +15.0% (val) / +13.0% (test). MaxDD nunca peor a −16.7% (SPY: −55% en 2008). El Calmar (CAGR/|MaxDD|) es la métrica reina: retorno por unidad de riesgo.</p>
-    <p><strong>🔄 Paper trading:</strong> simula trades con $500 virtuales. No usa dinero real. Cada 2 horas GitHub Actions ejecuta un ciclo: descarga precios (tvDatafeed + yfinance fallback) → evalúa signals → compra/vende → actualiza este dashboard. Un guard CI (smoke test) verifica cada ciclo: si el bot crashea, no evalúa, o no completa, el workflow falla en rojo — nunca un dashboard verde con el bot ciego.</p>
-    <p><strong>🧠 Aprendizaje:</strong> el bot guarda el historial de trades cerrados y re-diaria los pesos (adaptive weights). El margin_mult escala el size según el número de votos: 2 votos → size 0.33x, 4+ votos → 0.7x. El weekly/monthly compounding sube el size si las semanas van positivas.</p>
-    <p><strong>📈 Métricas clave:</strong></p>
-    <ul style="margin-left: 20px; margin-top: 8px;">
-      <li><strong>Capital total:</strong> cash + valor de posiciones</li>
-      <li><strong>P&L:</strong> ganancia/pérdida desde $500 inicial</li>
-      <li><strong>Win rate semanal:</strong> % de semanas con retorno positivo</li>
-      <li><strong>Max DD:</strong> máxima caída desde el pico (drawdown)</li>
-    </ul>
-  </div>
-</div>
-
 <div class="refresh-info">
   Actualizado cada 2 horas automáticamente. Último update: <code id="last-update">cargando...</code><br>
   Próximo ciclo: <code id="next-run">cargando...</code>
@@ -406,6 +387,8 @@ function renderDashboard(state) {
             <th>Cantidad</th>
             <th>Entry</th>
             <th>Actual</th>
+            <th>TP</th>
+            <th>SL</th>
             <th>Valor</th>
             <th>P&L</th>
             <th>Peso</th>
@@ -420,12 +403,30 @@ function renderDashboard(state) {
             const pnlPos = (current - entry) * qty;
             const pnlPctPos = entry > 0 ? ((current / entry - 1) * 100) : 0;
             const weight = (value / totalValue) * 100;
+            const barriers = p.barriers || {};
+            const tp = barriers.tp_price;
+            const sl = barriers.sl_price;
+            const isSleeve = p.strategy === "williams_sleeve";
+            const tpDisplay = isSleeve ? (p.prev_high ? formatCurrency(p.prev_high) : "—") : (tp ? formatCurrency(tp) : "—");
+            const slDisplay = isSleeve ? "W%R>−30" : (sl ? formatCurrency(sl) : "—");
+            let rangeStatus = "";
+            let rangeColor = "";
+            if (!isSleeve && tp && sl) {
+              if (current >= tp) { rangeStatus = "🎯 TP"; rangeColor = "color:#10b981;font-weight:bold;"; }
+              else if (current <= sl) { rangeStatus = "⚠️ SL"; rangeColor = "color:#ef4444;font-weight:bold;"; }
+              else { rangeStatus = "✓ rango"; rangeColor = "color:#10b981;"; }
+            } else if (isSleeve && p.prev_high) {
+              if (current >= p.prev_high) { rangeStatus = "🎯 TP"; rangeColor = "color:#10b981;font-weight:bold;"; }
+              else { rangeStatus = "✓ rango"; rangeColor = "color:#10b981;"; }
+            }
             return `
               <tr>
-                <td><strong>${sym}</strong></td>
+                <td><strong>${sym}</strong>${isSleeve ? '<br><span style="font-size:10px;color:#a78bfa;">sleeve</span>' : ''}</td>
                 <td>${qty.toFixed(4)}</td>
                 <td>${formatCurrency(entry)}</td>
                 <td>${formatCurrency(current)}</td>
+                <td style="${rangeColor}">${tpDisplay}${rangeStatus ? '<br><span style="font-size:10px;">' + rangeStatus + '</span>' : ''}</td>
+                <td style="color:#ef4444;">${slDisplay}</td>
                 <td>${formatCurrency(value)}</td>
                 <td class="${pnlPos >= 0 ? "pnl-positive" : "pnl-negative"}">
                   ${formatPnl(pnlPos)} (${formatPct(pnlPctPos)})
