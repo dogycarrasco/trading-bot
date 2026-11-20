@@ -405,7 +405,7 @@ function renderDashboard(state) {
             const weight = (value / totalValue) * 100;
             const barriers = p.barriers || {};
             const tp = barriers.tp_price;
-            const sl = barriers.sl_price;
+            const sl = p.peak_price ? p.peak_price * 0.92 : null;  // trailing 8% real
             const isSleeve = p.strategy === "williams_sleeve";
             const tpDisplay = isSleeve ? (p.prev_high ? formatCurrency(p.prev_high) : "—") : (tp ? formatCurrency(tp) : "—");
             const slDisplay = isSleeve ? "W%R>−30" : (sl ? formatCurrency(sl) : "—");
