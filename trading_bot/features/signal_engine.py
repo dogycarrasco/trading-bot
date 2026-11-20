@@ -253,6 +253,7 @@ class SetupSignal:
         vol_avg = float(volume.iloc[-lookback:].mean())
         vol_now = float(volume.iloc[-1])
         vol_ratio = vol_now / vol_avg if vol_avg > 0 else 1
+        ema9 = float(close.ewm(span=9, adjust=False).mean().iloc[-1])
         tags = []
         if last > hi_20 and vol_ratio > 1.5 and 40 <= r_last <= 70:
             tags.append("breakout_20d")
@@ -264,7 +265,7 @@ class SetupSignal:
             tags.append("oversold")
         if r_prev < 30 and last > float(close.iloc[-2]):
             tags.append("oversold_bounce")
-        if last > ma_20 and ma_20 > ma_20_prev and 45 <= r_last <= 72:
+        if last > ma_20 and ma_20 > ma_20_prev and 45 <= r_last <= 72 and last > ema9:
             tags.append("trend_cont")
         metrics = {"rsi": r_last, "high_20": hi_20, "ma_20": ma_20, "vol_ratio": vol_ratio, "price": last}
         return tags, metrics
