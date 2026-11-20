@@ -521,7 +521,13 @@ function renderDashboard(state) {
   }
 
   // Equity curve
-  const snapshots = state.daily_snapshots || [];
+  const allSnapshots = state.daily_snapshots || [];
+  // Filtro visual: solo últimos 7 días (el análisis guarda todo)
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 7);
+  const snapshots = allSnapshots.filter(s => {
+    try { return new Date(s.date) >= cutoff; } catch(e) { return true; }
+  });
   if (snapshots.length > 1) {
     renderEquityChart(snapshots);
   }
