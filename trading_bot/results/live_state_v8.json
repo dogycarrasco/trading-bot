@@ -57,6 +57,15 @@
       "positions": {},
       "week_pnl": 0.0,
       "week_pct": 0.0
+    },
+    {
+      "date": "2026-11-21T22:55:05.723835",
+      "total_value": 500.0,
+      "cash": 500.0,
+      "positions_count": 0,
+      "positions": {},
+      "week_pnl": 0.0,
+      "week_pct": 0.0
     }
   ],
   "cooldowns": {},
@@ -75,7 +84,7 @@
   "monthly_size_mult": 1.0,
   "vol_scaling": 1.0,
   "total_value": 500.0,
-  "last_update": "2026-11-21T17:12:39.325533",
+  "last_update": "2026-11-21T22:55:05.723835",
   "current_week_pnl": 0.0,
   "current_week_pct": 0.0
 }
