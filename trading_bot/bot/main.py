@@ -334,6 +334,8 @@ class TradingBotV15:
         for sym, pos in positions.items():
             df = load_tv_data(sym, "")
             if df.empty:
+                # FIX: sin datos → mantener último precio conocido, no saltar
+                pos["current_price"] = pos.get("current_price", pos.get("entry_price", 0))
                 continue
             price = float(df["close"].iloc[-1])
             pos["current_price"] = price
@@ -362,15 +364,19 @@ class TradingBotV15:
                 continue
             df_w = load_tv_data(sym, "")
             if df_w.empty:
-                continue
-            sub_w = df_w.loc[:today_ts] if today_ts in df_w.index else df_w
-            if len(sub_w) < 2:
-                continue
-            prev_high = pos.get("prev_high", float(sub_w["high"].iloc[-2]))
-            px = float(sub_w["close"].iloc[-1])
-            hh = float(sub_w["high"].iloc[-2:].max())
-            ll = float(sub_w["low"].iloc[-2:].min())
-            wr2 = -100 * (hh - px) / (hh - ll) if (hh - ll) > 0 else -50
+                # FIX: sin datos → evaluar salida con último precio conocido
+                px = pos.get("current_price", pos.get("entry_price", 0))
+                prev_high = pos.get("prev_high", px)
+                wr2 = -50  # neutral: no forzar salida por W%R sin datos
+            else:
+                sub_w = df_w.loc[:today_ts] if today_ts in df_w.index else df_w
+                if len(sub_w) < 2:
+                    continue
+                prev_high = pos.get("prev_high", float(sub_w["high"].iloc[-2]))
+                px = float(sub_w["close"].iloc[-1])
+                hh = float(sub_w["high"].iloc[-2:].max())
+                ll = float(sub_w["low"].iloc[-2:].min())
+                wr2 = -100 * (hh - px) / (hh - ll) if (hh - ll) > 0 else -50
             if px > prev_high or wr2 > -30:
                 proceeds = pos["qty"] * px * (1 - 0.001)
                 self.state["cash"] += proceeds
@@ -387,6 +393,13 @@ class TradingBotV15:
                 continue
             df = load_tv_data(sym, "")
             if df.empty:
+                # FIX: sin datos → evaluar trailing stop con último precio conocido
+                px = pos.get("current_price", pos.get("entry_price", 0))
+                peak = pos.get("peak_price", px)
+                if peak > 0 and px < peak * 0.92:
+                    reason = "TRAILING_NODATA"
+                    exit_price = px
+                    to_sell.append((sym, reason, exit_price))
                 continue
             entry_date_str = pos.get("entry_date")
             try:
