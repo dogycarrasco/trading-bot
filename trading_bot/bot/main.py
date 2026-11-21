@@ -356,6 +356,9 @@ class TradingBotV15:
             return
         today = self._today()
         today_ts = pd.Timestamp(today)
+        # VIX para trailing adaptativo (ATR cuando VIX >= 25)
+        vix_df = load_tv_data("VIX", "CBOE")
+        vix_current = float(vix_df["close"].iloc[-1]) if not vix_df.empty else 20.0
         to_sell = []
 
         # SLEEVE Williams: salida por reglas propias
@@ -433,13 +436,24 @@ class TradingBotV15:
             elif outcome["hold_days"] >= self.MAX_HOLD_DAYS:
                 reason = "TIMEOUT"
 
-            # Trailing stop
+            # Trailing stop (ATR-adaptive cuando VIX >= 25)
             peak_pos = pos.get("peak_price", entry)
             gain = (peak_pos / entry - 1) if entry > 0 else 0
             drop = (price_today / peak_pos - 1) if peak_pos > 0 else 0
-            if gain >= self.TRAILING_TRIGGER and drop <= self.TRAILING_DROP:
-                reason = "TRAILING"
-                exit_price = price_today
+            if gain >= self.TRAILING_TRIGGER:
+                if vix_current >= 25:
+                    # Alta volatilidad: trailing = 2×ATR% (más protector)
+                    try:
+                        atr_val = atr_at_date(df, today_ts)
+                        atr_pct = (atr_val / price_today) if atr_val and price_today > 0 else 0.03
+                        trail_drop = -max(0.04, min(0.15, atr_pct * 2))
+                    except Exception:
+                        trail_drop = self.TRAILING_DROP
+                else:
+                    trail_drop = self.TRAILING_DROP
+                if drop <= trail_drop:
+                    reason = "TRAILING"
+                    exit_price = price_today
 
             if reason:
                 to_sell.append((sym, reason, exit_price))
