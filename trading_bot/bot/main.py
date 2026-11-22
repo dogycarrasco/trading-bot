@@ -753,36 +753,13 @@ class TradingBotV15:
         elif cb_active and total_value >= peak * 0.98:
             self.state["circuit_breaker_until"] = None
         ms = self._get_market_score()
-        if self.hedge_manager.should_hedge(ms) and len(self.hedge_manager.positions) == 0:
-            try:
-                spy_df = load_tv_data("SPY", "")
-                if spy_df is not None and not spy_df.empty:
-                    spy_price = float(spy_df["close"].iloc[-1])
-                    self.hedge_manager.buy_put(spy_price, 25, quantity=1)
-                    self.log("  HEDGE: put virtual comprado")
-            except Exception:
-                pass
-        if len(self.hedge_manager.positions) > 0:
-            try:
-                spy_df = load_tv_data("SPY", "")
-                if spy_df is not None and not spy_df.empty:
-                    spy_price = float(spy_df["close"].iloc[-1])
-                    self.hedge_manager.update_positions(spy_price, 25)
-                    if ms >= -10:
-                        self.hedge_manager.close_all(spy_price, 25)
-                        self.log("  HEDGE: cerrado, mercado recuperado")
-            except Exception:
-                pass
-            self.log(f"  Circuit breaker reseteado (recuperado a >=98% del peak)")
+        # Hedge virtual DESACTIVADO: causaba inflacion del total ($1090 vs $500 real)
 
     def snapshot(self):
         """Guarda snapshot diario + reporta resultado semanal."""
         cash = self.state.get("cash", 0)
         total_value = cash + sum(p.get("value", 0) for p in self.state.get("positions", {}).values())
-        hedge_val = self.hedge_manager.total_hedge_value()
-        total_value += hedge_val
-        if hedge_val > 0:
-            self.log(f"  HEDGE valor: ${hedge_val:.2f}")
+        # Hedge virtual desactivado — no se suma al total
         self.log(f"Total portfolio value: ${total_value:.2f} "
                  f"(cash ${cash:.2f}, invertido ${total_value - cash:.2f})")
 
