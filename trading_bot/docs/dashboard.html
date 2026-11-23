@@ -533,11 +533,23 @@ function renderDashboard(state) {
   }
 
   // Last update
-  document.getElementById("last-update").textContent = formatDate(state.last_update);
-  const nextRun = new Date();
-  nextRun.setHours(Math.ceil(nextRun.getHours() / 2) * 2);
-  nextRun.setMinutes(0);
-  document.getElementById("next-run").textContent = nextRun.toLocaleString("es-EC", {dateStyle: "short", timeStyle: "short"});
+  // Último update: del estado del bot
+  const lastUpdate = state.last_update || state.daily_snapshots?.slice(-1)[0]?.date;
+  document.getElementById("last-update").textContent = formatDate(lastUpdate);
+  // Próximo ciclo: calcular en UTC (cron corre a horas pares UTC), mostrar en local
+  const now = new Date();
+  const twoHours = 2 * 60 * 60 * 1000;
+  const currentPeriod = Math.floor(now.getTime() / twoHours) * twoHours;
+  const nextUTC = new Date(currentPeriod + twoHours);
+  document.getElementById("next-run").textContent = nextUTC.toLocaleString("es-EC", {dateStyle: "short", timeStyle: "short"});
+  // Alerta si el último update es >3h atrás
+  if (lastUpdate) {
+    const ageMs = now.getTime() - new Date(lastUpdate).getTime();
+    if (ageMs > 3 * 60 * 60 * 1000) {
+      document.getElementById("last-update").style.color = "#ef4444";
+      document.getElementById("last-update").textContent += " (posible retraso)";
+    }
+  }
 }
 
 function renderEquityChart(snapshots) {
