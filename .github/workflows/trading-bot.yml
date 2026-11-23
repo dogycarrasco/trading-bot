@@ -27,7 +27,7 @@ jobs:
         run: |
           pip install --quiet -r trading_bot/requirements.txt
           pip install --quiet git+https://github.com/rongardF/tvdatafeed.git
-          pip install --quiet yfinance
+          pip install --quiet yfinance alpaca -py
       - uses: actions/cache@v4
         with:
           path: |
@@ -69,8 +69,11 @@ jobs:
               except Exception as e:
                   print(f'{sym}: ERROR {e}')
           "
-      - name: Run bot
+            - name: Run bot
         continue-on-error: true
+        env:
+          ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
         run: |
           cd trading_bot
           python -m bot.main --once 2>&1 | tee ../live_run.log
