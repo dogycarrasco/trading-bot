@@ -27,7 +27,7 @@ jobs:
         run: |
           pip install --quiet -r trading_bot/requirements.txt
           pip install --quiet git+https://github.com/rongardF/tvdatafeed.git
-          pip install --quiet yfinance alpaca -py
+          pip install --quiet yfinance alpaca-py
       - uses: actions/cache@v4
         with:
           path: |
