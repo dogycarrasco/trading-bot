@@ -17,6 +17,13 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 
 CACHE_DIR = os.path.join(ROOT, "data", "tv_cache")
+
+# Alpaca data adapter (fallback a yfinance si no disponible)
+try:
+    from data.alpaca_loader import load_via_alpaca
+    ALPACA_OK = True
+except Exception:
+    ALPACA_OK = False
 EXT_DIR = os.path.join(ROOT, "data", "external")
 FUND_CACHE = os.path.join(ROOT, "data", "external", "fundamentals_cache.json")
 
@@ -56,6 +63,13 @@ ETF_HOLDINGS = {
 
 
 def load_tv_data(symbol, exchange):
+    # FIX: intentar Alpaca primero para datos frescos en tiempo real
+    if ALPACA_OK:
+        df_alpaca = load_via_alpaca(symbol, exchange)
+        if not df_alpaca.empty and len(df_alpaca) > 25:
+            df_alpaca = df_alpaca.dropna(subset=["close"])
+            return df_alpaca
+    # Fallback al CSV cacheado
     path = os.path.join(CACHE_DIR, f"{symbol}_{exchange}.csv")
     if not os.path.exists(path):
         for exch in ["AMEX", "NASDAQ", "CME_MINI", "NYMEX", "COMEX", "FX", "BINANCE"]:
