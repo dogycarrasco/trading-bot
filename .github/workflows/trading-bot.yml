@@ -69,7 +69,7 @@ jobs:
               except Exception as e:
                   print(f'{sym}: ERROR {e}')
           "
-            - name: Run bot
+      - name: Run bot
         continue-on-error: true
         env:
           ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
