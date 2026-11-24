@@ -338,7 +338,12 @@ function formatPnl(n) {
 function formatDate(iso) {
   if (!iso) return "n/a";
   try {
-    const d = new Date(iso);
+    // FIX: bot guarda timestamps en UTC sin sufijo; JS los interpreta como local
+    let isoFixed = iso;
+    if (!iso.endsWith("Z") && !iso.includes("+")) {
+      isoFixed = iso + "Z";
+    }
+    const d = new Date(isoFixed);
     return d.toLocaleString("es-EC", {dateStyle: "short", timeStyle: "short"});
   } catch {
     return iso;
