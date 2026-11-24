@@ -17,8 +17,10 @@ def verify_keys():
     if _keys_ok is not None:
         return _keys_ok
     if not AUTH:
+        print(f"Alpaca: API_KEY={'si' if API_KEY else 'no'}({len(API_KEY)}) SECRET={'si' if SECRET_KEY else 'no'}({len(SECRET_KEY)})")
         _keys_ok = False
         return False
+    print(f"Alpaca debug: key='{API_KEY[:5]}...' secret='{SECRET_KEY[:5]}...'")
     try:
         r = requests.get(ACCOUNT_URL, auth=AUTH, timeout=10)
         if r.status_code == 200:
