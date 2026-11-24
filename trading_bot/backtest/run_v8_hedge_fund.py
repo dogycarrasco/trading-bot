@@ -63,13 +63,12 @@ ETF_HOLDINGS = {
 
 
 def load_tv_data(symbol, exchange):
-    # FIX: intentar Alpaca primero para datos frescos en tiempo real
-    if ALPACA_OK:
-        df_alpaca = load_via_alpaca(symbol, exchange)
-        if not df_alpaca.empty and len(df_alpaca) > 25:
-            df_alpaca = df_alpaca.dropna(subset=["close"])
-            return df_alpaca
-    # Fallback al CSV cacheado
+    # Alpaca integration pausada (401 auth issue con GitHub secrets)
+    # Cuando se arreglen las secrets, descomentar las 4 lineas siguientes:
+    # if ALPACA_OK:
+    #     df_alpaca = load_via_alpaca(symbol, exchange)
+    #     if not df_alpaca.empty and len(df_alpaca) > 25:
+    #         return df_alpaca.dropna(subset=["close"])
     path = os.path.join(CACHE_DIR, f"{symbol}_{exchange}.csv")
     if not os.path.exists(path):
         for exch in ["AMEX", "NASDAQ", "CME_MINI", "NYMEX", "COMEX", "FX", "BINANCE"]:
