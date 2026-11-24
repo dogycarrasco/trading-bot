@@ -43,7 +43,9 @@ def verify_keys():
 def fetch_alpaca_bars(symbol, limit=500):
     """Descarga barras diarias de Alpaca via REST API (feed IEX gratuito)."""
     if not API_KEY or not SECRET_KEY:
-        print(f"Alpaca {symbol}: sin API keys (ALPACA_API_KEY={'presente' if API_KEY else 'vacio'}, ALPACA_SECRET_KEY={'presente' if SECRET_KEY else 'vacio'})")
+        print(f"Alpaca {symbol}: sin API keys")
+        return pd.DataFrame()
+    if not verify_keys():
         return pd.DataFrame()
     try:
         url = f"{DATA_URL}/{symbol}/bars"
