@@ -134,6 +134,7 @@ jobs:
         id: deployment
         if: always()
         if: always()
+        if: always()
         uses: actions/deploy-pages@v4
       - name: Commit state
         if: always()
