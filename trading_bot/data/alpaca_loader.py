@@ -15,6 +15,31 @@ HEADERS = {
 }
 
 
+_keys_verified = False
+
+def verify_keys():
+    """Verifica que las API keys funcionan con el endpoint de cuenta (paper)."""
+    global _keys_verified
+    if _keys_verified:
+        return True
+    if not API_KEY or not SECRET_KEY:
+        print("Alpaca: sin API keys en env")
+        return False
+    try:
+        r = requests.get("https://paper-api.alpaca.markets/v2/account", headers=HEADERS, timeout=10)
+        if r.status_code == 200:
+            acct = r.json()
+            print(f"Alpaca keys OK: cuenta paper ${float(acct.get('cash',0)):,.0f}")
+            _keys_verified = True
+            return True
+        else:
+            print(f"Alpaca keys FAIL: account HTTP {r.status_code}")
+            return False
+    except Exception as e:
+        print(f"Alpaca keys ERROR: {e}")
+        return False
+
+
 def fetch_alpaca_bars(symbol, limit=500):
     """Descarga barras diarias de Alpaca via REST API (feed IEX gratuito)."""
     if not API_KEY or not SECRET_KEY:
