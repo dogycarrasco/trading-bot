@@ -1,72 +1,77 @@
-"""Alpaca data adapter — reemplaza yfinance para datos de precios.
-Usa Alpaca Market Data API con feed IEX (gratuito) para barras diarias.
+"""Alpaca data adapter via REST API — sin librería alpaca-py.
+Usa requests + HTTP directo a Alpaca Market Data API v2 (feed IEX gratuito).
 Fallback a yfinance si Alpaca no disponible."""
 import os
+import requests
 import pandas as pd
-from datetime import datetime, timedelta
-
-try:
-    from alpaca.data.historical import StockHistoricalDataClient
-    from alpaca.data.requests import StockBarsRequest
-    from alpaca.data.timeframe import TimeFrame
-    try:
-        from alpaca.data.enums import DataFeed
-        HAS_FEED = True
-    except ImportError:
-        HAS_FEED = False
-    ALPACA_AVAILABLE = True
-except ImportError:
-    ALPACA_AVAILABLE = False
-    HAS_FEED = False
 
 API_KEY = os.environ.get("ALPACA_API_KEY", "")
 SECRET_KEY = os.environ.get("ALPACA_SECRET_KEY", "")
+DATA_URL = "https://data.alpaca.markets/v2/stocks"
 
-_client = None
-
-def _get_client():
-    global _client
-    if _client is None and API_KEY and SECRET_KEY:
-        _client = StockHistoricalDataClient(API_KEY, SECRET_KEY)
-    return _client
+HEADERS = {
+    "APCA-API-KEY-ID": API_KEY,
+    "APCA-API-SECRET-KEY": SECRET_KEY,
+}
 
 
-def fetch_alpaca_bars(symbol, days=500):
-    """Descarga barras diarias de Alpaca con feed IEX (gratuito)."""
-    client = _get_client()
-    if client is None:
+def fetch_alpaca_bars(symbol, limit=500):
+    """Descarga barras diarias de Alpaca via REST API (feed IEX gratuito)."""
+    if not API_KEY or not SECRET_KEY:
         return pd.DataFrame()
     try:
-        end = datetime.now()
-        start = end - timedelta(days=days)
-        
-        # Construir request con feed IEX (gratuito) si disponible
-        kwargs = {
-            "symbol_or_symbols": symbol,
-            "timeframe": TimeFrame.Day,
-            "start": start,
-            "end": end,
+        url = f"{DATA_URL}/{symbol}/bars"
+        params = {
+            "timeframe": "1Day",
+            "limit": limit,
+            "feed": "iex",
+            "sort": "asc",
         }
-        if HAS_FEED:
-            kwargs["feed"] = DataFeed.IEX  # Free tier: IEX data
-        
-        request = StockBarsRequest(**kwargs)
-        bars = client.get_stock_bars(request)
-        
-        if bars is None or len(bars) == 0:
+        response = requests.get(url, headers=HEADERS, params=params, timeout=15)
+
+        if response.status_code != 200:
+            print(f"Alpaca {symbol}: HTTP {response.status_code} - {response.text[:100]}")
             return pd.DataFrame()
-        
-        df = bars.df if hasattr(bars, "df") else pd.DataFrame(bars)
-        if isinstance(df.index, pd.MultiIndex):
-            df = df.droplevel(0)
-        df.columns = [c.lower() for c in df.columns]
+
+        data = response.json()
+        bars = data.get("bars", [])
+
+        if not bars:
+            print(f"Alpaca {symbol}: sin barras en respuesta")
+            return pd.DataFrame()
+
+        # Convertir a DataFrame
+        df = pd.DataFrame(bars)
+        df["date"] = pd.to_datetime(df["t"])
+        df = df.set_index("date")
+        df = df.rename(columns={"o": "open", "h": "high", "l": "low", "c": "close", "v": "volume"})
+        df = df[["open", "high", "low", "close", "volume"]]
         df = df.dropna(subset=["close"])
+
+        # Paginación (next_page_token)
+        next_token = data.get("next_page_token")
+        while next_token and len(df) < 2000:
+            params["page_token"] = next_token
+            resp2 = requests.get(url, headers=HEADERS, params=params, timeout=15)
+            if resp2.status_code != 200:
+                break
+            more = resp2.json().get("bars", [])
+            if not more:
+                break
+            more_df = pd.DataFrame(more)
+            more_df["date"] = pd.to_datetime(more_df["t"])
+            more_df = more_df.set_index("date")
+            more_df = more_df.rename(columns={"o": "open", "h": "high", "l": "low", "c": "close", "v": "volume"})
+            more_df = more_df[["open", "high", "low", "close", "volume"]]
+            more_df = more_df.dropna(subset=["close"])
+            df = pd.concat([df, more_df])
+            next_token = resp2.json().get("next_page_token")
+
+        print(f"Alpaca {symbol}: {len(df)} barras OK (feed iex)")
         return df
+
     except Exception as e:
-        # Error detallado para diagnostico
-        err_type = type(e).__name__
-        err_msg = str(e)[:120]
-        print(f"Alpaca {symbol}: {err_type}: {err_msg}")
+        print(f"Alpaca {symbol}: {type(e).__name__}: {str(e)[:120]}")
         return pd.DataFrame()
 
 
@@ -81,7 +86,7 @@ def load_via_alpaca(symbol, exchange=""):
         "VIX": None,
     }
     alpaca_sym = alpaca_map.get(symbol)
-    if alpaca_sym is None or not ALPACA_AVAILABLE or not API_KEY:
+    if alpaca_sym is None or not API_KEY:
         return pd.DataFrame()
-    
+
     return fetch_alpaca_bars(alpaca_sym)
