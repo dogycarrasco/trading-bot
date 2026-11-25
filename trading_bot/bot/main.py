@@ -117,6 +117,14 @@ class TradingBotV15:
                 self.config = yaml.safe_load(f)
         else:
             self.config = {}
+
+        # Fix 4+5: leer params de riesgo desde config.yaml (antes hardcoded)
+        risk_cfg = (self.config or {}).get("risk", {}) or {}
+        self.SL_FACTOR = float(risk_cfg.get("sl_factor", 5.0))
+        self.PT_FACTOR = float(risk_cfg.get("pt_factor", 5.0))
+        self.CIRCUIT_BREAKER_DD = float(risk_cfg.get("circuit_breaker_dd", -0.10))
+        self.CIRCUIT_BREAKER_DAYS = int(risk_cfg.get("circuit_breaker_days", 30))
+        self.CIRCUIT_BREAKER_SIZE_MULT = float(risk_cfg.get("circuit_breaker_size_mult", 0.5))
         self.running = False
         self.log_path = os.path.join(ROOT, "results", "live_log_v8.txt")
         self.state_path = os.path.join(ROOT, "results", "live_state_v8.json")

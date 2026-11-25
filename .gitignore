@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+env/
+results/*.csv
+results/*.json
+results/*.png
+!results/live_state_v8.json
+!results/live_log_v8.txt
+dead_code_audit_post.txt

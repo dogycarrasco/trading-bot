@@ -45,6 +45,12 @@ backtest:
   cripto_leverage: 1.0
 
 risk:
+  sl_factor: 5.0
+  pt_factor: 5.0
+  circuit_breaker_dd: -0.10
+  circuit_breaker_days: 30
+  circuit_breaker_size_mult: 0.5
+
   # === DOCUMENTACIÓN DE PARÁMETROS ===
   # stop_loss_atr_mult / take_profit_atr_mult: usados en TRIPLE BARRIER (backtest labeling)
   #   NO confundir con el trailing stop del bot live (0.92 * peak = 8% desde pico)
