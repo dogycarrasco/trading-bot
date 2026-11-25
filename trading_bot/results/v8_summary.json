@@ -1,0 +1,197 @@
+{
+  "strategy": "v8_hedge_fund_agents_macro",
+  "bot_metrics": {
+    "cagr_pct": 13.51,
+    "sharpe": 0.46,
+    "max_drawdown_pct": -49.6,
+    "max_dd_date": "2015-11-30 00:00:00",
+    "final_equity": 6234.51,
+    "total_return_pct": 1146.9,
+    "n_years": 19.9
+  },
+  "bot_annual_returns": {
+    "2008": -38.73,
+    "2009": 26.7,
+    "2010": 6.79,
+    "2011": 15.76,
+    "2012": 3.38,
+    "2013": 26.53,
+    "2014": 11.89,
+    "2015": -48.98,
+    "2016": 3.22,
+    "2017": 159.23,
+    "2018": -10.49,
+    "2019": 39.41,
+    "2020": 47.6,
+    "2021": 110.74,
+    "2022": 0.68,
+    "2023": 14.37,
+    "2024": 14.79,
+    "2025": 19.34,
+    "2026": -4.14
+  },
+  "spy_metrics": {
+    "cagr_pct": 8.72,
+    "sharpe": 0.61,
+    "max_drawdown_pct": -52.2,
+    "max_dd_date": "2009-02-28 00:00:00",
+    "final_equity": 2573.74,
+    "total_return_pct": 425.05,
+    "n_years": 19.8
+  },
+  "spy_annual_returns": {
+    "2008": -38.28,
+    "2009": 23.49,
+    "2010": 12.84,
+    "2011": -0.2,
+    "2012": 13.47,
+    "2013": 29.69,
+    "2014": 11.29,
+    "2015": -0.81,
+    "2016": 9.64,
+    "2017": 19.38,
+    "2018": -6.35,
+    "2019": 28.79,
+    "2020": 16.16,
+    "2021": 27.04,
+    "2022": -19.48,
+    "2023": 24.29,
+    "2024": 23.3,
+    "2025": 16.35,
+    "2026": 8.51
+  },
+  "etf_fundamental_scores": {
+    "SPY": 0.017,
+    "QQQ": 0.016,
+    "XLK": -0.012,
+    "XLF": -0.014,
+    "XLE": -0.054,
+    "XLV": -0.057,
+    "XLY": -0.035,
+    "XLP": -0.048,
+    "XLI": -0.026,
+    "XLU": -0.057,
+    "GLD": 0,
+    "USO": 0,
+    "BTCUSD": 0,
+    "ETHUSD": 0,
+    "SOLUSD": 0,
+    "BNBUSD": 0,
+    "XRPUSD": 0,
+    "ADAUSD": 0
+  },
+  "benchmark": {
+    "inflation_real_ecuador_annual": 0.17
+  },
+  "agents_used": [
+    "graham",
+    "buffett",
+    "munger",
+    "lynch",
+    "druckenmiller"
+  ],
+  "selections_last_6_months": [
+    {
+      "month": "2026-06",
+      "selected": [
+        "XLK",
+        "XLI",
+        "QQQ"
+      ],
+      "regime": "NORMAL",
+      "reasons": [],
+      "cash_pct": 0.0,
+      "mom_values": {
+        "XLK": 1.872285645443244,
+        "XLI": 1.146623031988391,
+        "QQQ": 1.0955418908745762
+      }
+    },
+    {
+      "month": "2026-07",
+      "selected": [
+        "XLV",
+        "USO",
+        "XLE"
+      ],
+      "regime": "NORMAL",
+      "reasons": [],
+      "cash_pct": 0.0,
+      "mom_values": {
+        "XLV": 1.3341157270660249,
+        "USO": 1.0570861032736565,
+        "XLE": 1.0444156790768602
+      }
+    },
+    {
+      "month": "2026-08",
+      "selected": [
+        "XLE",
+        "XLV",
+        "USO",
+        "XLK",
+        "XLF"
+      ],
+      "regime": "LOW_VIX_BULL",
+      "reasons": [
+        "VIX=15<15"
+      ],
+      "cash_pct": 0.0,
+      "mom_values": {
+        "XLE": 1.37481529594021,
+        "XLV": 1.3626394977967937,
+        "USO": 1.3539642157605742,
+        "XLK": 0.7152698544778345,
+        "XLF": 0.07222355807796282
+      }
+    },
+    {
+      "month": "2026-09",
+      "selected": [
+        "USO",
+        "XLV",
+        "XLK"
+      ],
+      "regime": "NORMAL",
+      "reasons": [],
+      "cash_pct": 0.0,
+      "mom_values": {
+        "USO": 1.3339999493470747,
+        "XLV": 1.1973199619386106,
+        "XLK": 0.9324172017019652
+      }
+    },
+    {
+      "month": "2026-10",
+      "selected": [
+        "XLV",
+        "XLE",
+        "USO"
+      ],
+      "regime": "NORMAL",
+      "reasons": [],
+      "cash_pct": 0.0,
+      "mom_values": {
+        "XLV": 2.000050083906648,
+        "XLE": 1.773436067736634,
+        "USO": 1.497249554222615
+      }
+    },
+    {
+      "month": "2026-11",
+      "selected": [
+        "XLP",
+        "XLV",
+        "XLE"
+      ],
+      "regime": "NORMAL",
+      "reasons": [],
+      "cash_pct": 0.0,
+      "mom_values": {
+        "XLP": 1.5749794554183016,
+        "XLV": 1.361197777362162,
+        "XLE": 0.7460502808451797
+      }
+    }
+  ]
+}
