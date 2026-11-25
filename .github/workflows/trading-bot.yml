@@ -90,14 +90,14 @@ jobs:
           cp trading_bot/results/live_log_v8.txt _site/live_log_v8.txt 2>/dev/null || echo "Sin log" > _site/live_log_v8.txt
           
       - name: Setup Pages
+        if: always()
         uses: actions/configure-pages@v4
-        if: always()
         
-      - uses: actions/upload-pages-artifact@v3
+      - name: Upload Pages artifact
         if: always()
+        uses: actions/upload-pages-artifact@v3
         with:
           path: _site
-          name: github-pages
           
       - name: Deploy Pages
         id: deployment
