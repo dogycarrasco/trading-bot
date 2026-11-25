@@ -1,3 +1,6 @@
+# NOTA: Este modulo NO se importa en runtime del bot live.
+# Se conserva para backtests. No eliminar sin verificar.
+
 """
 Modelo ML: LightGBM classifier para predecir direccion del precio a N barras.
 

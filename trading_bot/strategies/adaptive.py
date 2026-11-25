@@ -1,3 +1,6 @@
+# NOTA: Este modulo NO se importa en runtime del bot live.
+# Se conserva para backtests. No eliminar sin verificar.
+
 """
 Selector adaptativo de estrategias v3.1 - ALWAYS INVESTED (Meb Faber style).
 

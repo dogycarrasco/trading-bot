@@ -1,3 +1,6 @@
+# NOTA: Este modulo NO se importa en runtime del bot live.
+# Se conserva para backtests. No eliminar sin verificar.
+
 """
 Risk manager adaptativo.
 """
