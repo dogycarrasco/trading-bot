@@ -45,6 +45,17 @@ backtest:
   cripto_leverage: 1.0
 
 risk:
+  # === DOCUMENTACIÓN DE PARÁMETROS ===
+  # stop_loss_atr_mult / take_profit_atr_mult: usados en TRIPLE BARRIER (backtest labeling)
+  #   NO confundir con el trailing stop del bot live (0.92 * peak = 8% desde pico)
+  #   El bot live usa ATR adaptive trailing: VIX>=25 → 2×ATR%, VIX<25 → 8% fijo
+  #
+  # max_drawdown_pct (0.18 = 18%): límite DURO del portfolio. Si se alcanza, detener.
+  # CIRCUIT_BREAKER_DD en main.py (-0.10 = 10%): EARLY WARNING, corta antes del límite duro.
+  #   Relación correcta: circuit breaker (10%) < max_drawdown (18%) → protege antes.
+  #
+  # SL_FACTOR/PT_FACTOR en main.py (5.0/5.0): multiplicadores ATR para triple barrier.
+  #   Estos son DEL BACKTEST, no del trailing stop live.
   base_risk_per_trade: 0.04
   max_risk_per_trade: 0.08
   min_risk_per_trade: 0.015
