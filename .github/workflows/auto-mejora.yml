@@ -9,7 +9,7 @@ permissions:
 jobs:
   optimize:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -27,7 +27,7 @@ jobs:
             trading_bot/data/external/
           key: bot-data-${{ github.run_id }}
           restore-keys: bot-data-
-      - name: Download data (yfinance con backoff)
+      - name: Download data (yfinance backoff)
         run: |
           cd trading_bot
           python -c "
@@ -35,21 +35,30 @@ jobs:
           universe = [('SPY','AMEX'),('QQQ','NASDAQ'),('XLK','AMEX'),('XLF','AMEX'),('XLE','AMEX'),('XLV','AMEX'),('XLY','AMEX'),('XLP','AMEX'),('XLI','AMEX'),('XLU','AMEX'),('GLD','AMEX'),('USO','AMEX'),('VIX','CBOE')]
           YF = {'SPY':'SPY','QQQ':'QQQ','XLK':'XLK','XLF':'XLF','XLE':'XLE','XLV':'XLV','XLY':'XLY','XLP':'XLP','XLI':'XLI','XLU':'XLU','GLD':'GLD','USO':'USO','VIX':'^VIX'}
           os.makedirs('data/tv_cache', exist_ok=True)
+          ok = 0
           for sym, exch in universe:
               path = f'data/tv_cache/{sym}_{exch}.csv'
-              for attempt in range(3):
+              for attempt in range(4):
                   try:
-                      df = yf.download(YF.get(sym, sym), period='2y', interval='1d', progress=False, auto_adjust=True)
+                      df = yf.download(YF.get(sym, sym), period='5y', interval='1d', progress=False, auto_adjust=True)
                       if df is not None and not df.empty:
                           if isinstance(df.columns, pd.MultiIndex):
                               df.columns = df.columns.get_level_values(0)
                           df.columns = [c.lower() for c in df.columns]
                           df = df.dropna(subset=['close'])
-                          if len(df) > 25: df.to_csv(path); print(f'{sym}: OK'); break
+                          if len(df) > 100:
+                              df.to_csv(path)
+                              ok += 1
+                              break
                   except Exception as e:
-                      if 'Too Many Requests' in str(e):
-                          wait = 2 ** attempt * 5; print(f'{sym}: rate limited, {wait}s'); time.sleep(wait)
-                      else: print(f'{sym}: ERROR {e}'); break
+                      if 'Too Many Requests' in str(e) or 'Rate' in str(e):
+                          wait = 2 ** attempt * 5
+                          print(f'{sym}: rate limited, esperando {wait}s')
+                          time.sleep(wait)
+                      else:
+                          print(f'{sym}: ERROR {e}')
+                          break
+          print(f'Datos: {ok}/{len(universe)} OK')
           "
       - name: Run grid search walk-forward
         run: cd trading_bot && python -m backtest.grid_search_optimize
@@ -60,12 +69,16 @@ jobs:
           python -c "
           import json, os
           path = 'results/optimized_config.json'
-          if not os.path.exists(path): print('skip'); exit(0)
+          if not os.path.exists(path):
+              print('skip: no output')
+              exit(0)
           cfg = json.load(open(path))
-          if cfg.get('avg_oos_calmar', 0) > 0.3:
+          calmar = cfg.get('avg_oos_calmar', 0)
+          if calmar > 0.3:
               print(f'::set-output name=improve::true')
-              print(f'OOS Calmar: {cfg[\"avg_oos_calmar\"]}')
-          else: print(f'skip: OOS {cfg.get(\"avg_oos_calmar\",0)} <= 0.3')
+              print(f'OOS Calmar: {calmar}')
+          else:
+              print(f'skip: OOS Calmar {calmar} <= 0.3')
           "
       - name: Create Pull Request
         if: steps.validate.outputs.improve == 'true'
@@ -74,5 +87,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "Auto-mejora: params optimizados (OOS Calmar > 0.3)"
           title: "Auto-mejora: configuracion optimizada"
-          body: "Grid search walk-forward. Parametros validados out-of-sample."
+          body: |
+            Grid search walk-forward (train 756 / test 252, rolling).
+            Holdout final 15% intocado durante optimizacion.
+            Parametros validados out-of-sample por Calmar.
           branch: auto-mejora/opt-${{ github.run_id }}
+          delete-branch: true
