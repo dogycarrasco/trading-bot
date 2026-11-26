@@ -1,15 +1,7 @@
 """
 Grid search walk-forward - Fix 2.
 
-El workflow auto-mejora.yml invoca: python -m backtest.grid_search_optimize
-
-Que hace:
-  1. Carga datos del universo via funciones de run_v8_hedge_fund.
-  2. Grid search sobre parametros de select_v8.
-  3. Walk-forward: train 756 barras (3y), test 252 barras (1y),
-     ventana rodante. Holdout final (ultimo 15%) NUNCA se toca.
-  4. Guarda resultado en results/optimized_config.json
-  5. Solo guarda si OOS Calmar mejora el umbral.
+python -m backtest.grid_search_optimize
 """
 from __future__ import annotations
 
@@ -34,9 +26,9 @@ from backtest.run_v8_hedge_fund import (
     build_momentum_table,
     select_v8,
     compute_metrics,
+    load_macro_features,
+    get_all_etf_scores,
 )
-
-# ---------- parametros del grid ----------
 
 GRID = {
     "top_n_base": [2, 3, 4],
@@ -45,20 +37,18 @@ GRID = {
     "bubble_penalty": [0.3, 0.5, 0.7],
 }
 
-# walk-forward
-TRAIN_BARS = 756   # 3 anos de barras diarias
-TEST_BARS = 252    # 1 ano
-HOLDOUT_FRAC = 0.15  # ultimo 15% de la historia: intocable
-
-# umbral: solo sugerir si OOS Calmar supera esto
+TRAIN_BARS = 756
+TEST_BARS = 252
+HOLDOUT_FRAC = 0.15
 MIN_OOS_CALMAR = 0.30
 
 
-def load_all_data() -> pd.DataFrame:
-    """Carga cierres diarios de todo el universo. Devuelve df de closes."""
+def load_all_data():
+    """Carga cierres diarios del universo."""
     from backtest.run_v8_hedge_fund import load_tv_data
     closes = {}
-    for sym, exch, *_ in UNIVERSE_V8:
+    for item in UNIVERSE_V8:
+        sym, exch = item[0], item[1]
         try:
             df = load_tv_data(sym, exch)
             if df is not None and len(df) > 100:
@@ -71,95 +61,90 @@ def load_all_data() -> pd.DataFrame:
     return all_df
 
 
-def run_one_config(params: dict, closes: pd.DataFrame,
-                   train_start, train_end) -> dict:
-    """Corre una config en una ventana. Devuelve metricas dict."""
-    window = closes.loc[train_start:train_end]
-    if len(window) < 60:
-        return {"cagr_pct": 0, "max_drawdown_pct": -100, "sharpe": 0, "calmar": 0}
+def compute_window_metrics(weights_df, rets, test_idx):
+    """Evalua una ventana test. Devuelve metricas dict."""
+    if weights_df is None or weights_df.empty:
+        return None
 
-    mom_df = build_momentum_table(UNIVERSE_V8)
-    if mom_df is None or mom_df.empty:
-        return {"cagr_pct": 0, "max_drawdown_pct": -100, "sharpe": 0, "calmar": 0}
+    w = weights_df.reindex(test_idx).shift(1).fillna(0)
+    r = rets.reindex(test_idx).fillna(0)
 
+    common_symbols = w.columns.intersection(r.columns)
+    if len(common_symbols) == 0:
+        return None
+
+    w = w[common_symbols]
+    r = r[common_symbols]
+    port_ret = (w * r).sum(axis=1).fillna(0)
+
+    if len(port_ret) < 30 or port_ret.std() == 0:
+        return None
+
+    equity = (1 + port_ret).cumprod() * 500.0
+    years = len(port_ret) / 252
+    if years <= 0 or equity.iloc[-1] <= 0:
+        return None
+
+    cagr = ((equity.iloc[-1] / 500.0) ** (1 / years) - 1) * 100
+    peak = equity.cummax()
+    dd = (equity - peak) / peak
+    max_dd = float(dd.min() * 100)
+    sharpe = float(port_ret.mean() / port_ret.std() * np.sqrt(252)) if port_ret.std() > 0 else 0
+    calmar = cagr / abs(max_dd) if max_dd != 0 else 0
+
+    return {
+        "cagr_pct": round(cagr, 2),
+        "max_drawdown_pct": round(max_dd, 2),
+        "sharpe": round(sharpe, 2),
+        "calmar": round(calmar, 3),
+    }
+
+
+def walk_forward_one_combo(params, mom_df, features, etf_scores, closes, rets):
+    """Para una config: correr select_v8 una vez, evaluar en ventanas test."""
     try:
         weights_df = select_v8(
             mom_df=mom_df,
-            features=pd.DataFrame(),
-            etf_scores={},
+            features=features,
+            etf_scores=etf_scores,
             top_n_base=params["top_n_base"],
             max_crypto_weight=params["max_crypto_weight"],
             max_single_asset=params["max_single_asset"],
             bubble_penalty=params["bubble_penalty"],
         )
-        if weights_df is None or weights_df.empty:
-            return {"cagr_pct": 0, "max_drawdown_pct": -100, "sharpe": 0, "calmar": 0}
-
-        rets = window.pct_change().fillna(0)
-        common = weights_df.index.intersection(rets.index)
-        if len(common) < 30:
-            return {"cagr_pct": 0, "max_drawdown_pct": -100, "sharpe": 0, "calmar": 0}
-
-        w = weights_df.loc[common].shift(1).fillna(0)
-        r = rets.loc[common]
-        port_ret = (w * r).sum(axis=1).fillna(0)
-        equity = (1 + port_ret).cumprod() * 500.0
-
-        years = len(port_ret) / 252
-        if years <= 0 or equity.iloc[-1] <= 0:
-            return {"cagr_pct": 0, "max_drawdown_pct": -100, "sharpe": 0, "calmar": 0}
-        cagr = ((equity.iloc[-1] / 500.0) ** (1 / years) - 1) * 100
-        peak = equity.cummax()
-        dd = (equity - peak) / peak
-        max_dd = float(dd.min() * 100)
-        sharpe = float(port_ret.mean() / port_ret.std() * np.sqrt(252)) if port_ret.std() > 0 else 0
-        calmar = cagr / abs(max_dd) if max_dd != 0 else 0
-
-        return {
-            "cagr_pct": round(cagr, 2),
-            "max_drawdown_pct": round(max_dd, 2),
-            "sharpe": round(sharpe, 2),
-            "calmar": round(calmar, 3),
-            "final_equity": round(float(equity.iloc[-1]), 2),
-        }
     except Exception as e:
-        return {"cagr_pct": 0, "max_drawdown_pct": -100, "sharpe": 0, "calmar": 0}
+        return {"calmar": 0, "cagr_pct": 0, "max_drawdown_pct": -100, "n_windows": 0, "error": str(e)}
 
+    if weights_df is None or weights_df.empty:
+        return {"calmar": 0, "cagr_pct": 0, "max_drawdown_pct": -100, "n_windows": 0,
+                "error": "select_v8 returned empty"}
 
-def walk_forward(params: dict, closes: pd.DataFrame) -> dict:
-    """
-    Walk-forward: ventanas train/test rodantes.
-    Devuelve promedio OOS de las ventanas test.
-    Holdout final excluido del proceso.
-    """
     total_bars = len(closes)
     holdout_start = int(total_bars * (1 - HOLDOUT_FRAC))
-    wf_closes = closes.iloc[:holdout_start]
 
     oos_results = []
     start = 0
-    while start + TRAIN_BARS + TEST_BARS <= len(wf_closes):
-        train_end_idx = start + TRAIN_BARS
-        test_start_idx = train_end_idx
-        test_end_idx = min(test_start_idx + TEST_BARS, len(wf_closes))
+    while start + TRAIN_BARS + TEST_BARS <= holdout_start:
+        test_start = start + TRAIN_BARS
+        test_end = min(test_start + TEST_BARS, holdout_start)
+        test_idx = closes.index[test_start:test_end]
 
-        test_idx = wf_closes.index[test_start_idx:test_end_idx]
-
-        m = run_one_config(params, wf_closes, test_idx[0], test_idx[-1])
-        oos_results.append(m)
-        start = test_end_idx
+        m = compute_window_metrics(weights_df, rets, test_idx)
+        if m is not None:
+            oos_results.append(m)
+        start = test_end
 
     if not oos_results:
-        return {"cagr_pct": 0, "max_drawdown_pct": -100, "calmar": 0, "n_windows": 0}
+        return {"calmar": 0, "cagr_pct": 0, "max_drawdown_pct": -100, "n_windows": 0,
+                "error": "no valid windows"}
 
-    avg = {
+    return {
         "cagr_pct": round(np.mean([r["cagr_pct"] for r in oos_results]), 2),
         "max_drawdown_pct": round(np.mean([r["max_drawdown_pct"] for r in oos_results]), 2),
         "sharpe": round(np.mean([r.get("sharpe", 0) for r in oos_results]), 2),
         "calmar": round(np.mean([r.get("calmar", 0) for r in oos_results]), 3),
         "n_windows": len(oos_results),
     }
-    return avg
 
 
 def main():
@@ -170,7 +155,7 @@ def main():
 
     os.makedirs(RESULTS_DIR, exist_ok=True)
 
-    print("\n[1/3] Cargando datos...")
+    print("\n[1/4] Cargando datos...")
     closes = load_all_data()
     if len(closes) < TRAIN_BARS + TEST_BARS:
         print(f"ERROR: insuficiente historia ({len(closes)} < {TRAIN_BARS + TEST_BARS})")
@@ -178,27 +163,51 @@ def main():
             json.dump({"status": "insufficient_data", "avg_oos_calmar": 0}, f, indent=2)
         return 0
 
-    print("\n[2/3] Grid search...")
+    print("\n[2/4] Cargando features macro + ETF scores + momentum...")
+    features = load_macro_features()
+    etf_scores = get_all_etf_scores()
+    mom_df = build_momentum_table(UNIVERSE_V8)
+    rets = closes.pct_change().fillna(0)
+
+    if mom_df is None or mom_df.empty:
+        print("ERROR: momentum table vacia")
+        with open(os.path.join(RESULTS_DIR, "optimized_config.json"), "w") as f:
+            json.dump({"status": "no_momentum", "avg_oos_calmar": 0}, f, indent=2)
+        return 0
+
+    print(f"  momentum: {mom_df.shape}, features: {features.shape if features is not None else 'None'}")
+    print(f"  etf_scores: {len(etf_scores) if etf_scores else 0} simbolos")
+
+    print("\n[3/4] Grid search...")
     keys = list(GRID.keys())
     combos = list(itertools.product(*[GRID[k] for k in keys]))
-    print(f"  {len(combos)} combinaciones x walk-forward")
+    print(f"  {len(combos)} combinaciones")
 
     results = []
+    first_error_logged = False
     for i, combo in enumerate(combos):
         params = dict(zip(keys, combo))
-        oos = walk_forward(params, closes)
+        oos = walk_forward_one_combo(params, mom_df, features, etf_scores, closes, rets)
         oos["params"] = params
         results.append(oos)
+
+        if oos.get("error") and not first_error_logged:
+            print(f"  [WARN] combo {i+1} error: {oos['error']}")
+            first_error_logged = True
+
         if (i + 1) % 9 == 0 or i == len(combos) - 1:
             best_so_far = max(r["calmar"] for r in results)
             print(f"  [{i+1}/{len(combos)}] best Calmar so far: {best_so_far:.3f}")
 
     best = max(results, key=lambda r: r["calmar"])
-    print(f"\n[3/3] Mejor config OOS:")
+    print(f"\n[4/4] Mejor config OOS:")
     print(f"  Calmar: {best['calmar']}")
     print(f"  CAGR: {best['cagr_pct']}%")
     print(f"  MaxDD: {best['max_drawdown_pct']}%")
+    print(f"  Windows: {best.get('n_windows', 0)}")
     print(f"  Params: {best['params']}")
+    if best.get("error"):
+        print(f"  (ultimo error visto: {best['error']})")
 
     if best["calmar"] >= MIN_OOS_CALMAR:
         output = {
