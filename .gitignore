@@ -1,3 +1,4 @@
+# Python cache
 __pycache__/
 *.pyc
 *.pyo
@@ -5,9 +6,18 @@ __pycache__/
 .venv/
 venv/
 env/
-results/*.csv
-results/*.json
-results/*.png
-!results/live_state_v8.json
-!results/live_log_v8.txt
+
+# Runtime artifacts del bot
+trading_bot/results/*.csv
+trading_bot/results/*.json
+trading_bot/results/*.png
+
+# Excepciones: archivos de estado que SI van al repo
+!trading_bot/results/live_state_v8.json
+!trading_bot/results/live_log_v8.txt
+!trading_bot/results/optimized_config.json
+
+# Temporales de parcheo
 dead_code_audit_post.txt
+apply_fix*.py
+recover_fix456.py
