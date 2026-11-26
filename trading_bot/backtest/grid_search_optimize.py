@@ -58,7 +58,7 @@ def load_all_data() -> pd.DataFrame:
     """Carga cierres diarios de todo el universo. Devuelve df de closes."""
     from backtest.run_v8_hedge_fund import load_tv_data
     closes = {}
-    for sym, exch in UNIVERSE_V8:
+    for sym, exch, *_ in UNIVERSE_V8:
         try:
             df = load_tv_data(sym, exch)
             if df is not None and len(df) > 100:
