@@ -1,43 +1,9 @@
-[2026-11-26 22:57:15 UTC] Modo: PAPER TRADING SIMULADO (sin broker real)
-[2026-11-26 22:57:15 UTC] Capital inicial: $500.00
-[2026-11-26 22:57:15 UTC] Posiciones actuales: 0
-[2026-11-26 22:57:15 UTC] Estrategia: 5 capas votando (Regime+Sentiment+Onchain+Trend+Setup)
-[2026-11-26 22:57:15 UTC] Compra si >= 2 capas votan +1
-[2026-11-26 22:57:15 UTC] ============================================================
-[2026-11-26 22:57:15 UTC] Ciclo bot v35 ADAPTIVE
-[2026-11-26 22:57:15 UTC] ============================================================
-[2026-11-26 22:57:15 UTC] Paso 1/5: Actualizar precios de posiciones
-[2026-11-26 22:57:15 UTC] Paso 2/5: Verificar exits (triple barrier + trailing)
-[2026-11-26 22:57:15 UTC] Paso 3/5: Circuit breaker check
-
-Cargando features macro...
-Alpaca debug: key='PKAZ5...' secret='BZ8tH...'
-Alpaca keys OK: paper $100,000
-[2026-11-26 22:57:15 UTC] Paso 4/5: Escanear oportunidades (5 capas votando)
-[2026-11-26 22:57:15 UTC]   Bear regime (score -25). Solo high-conviction.
-
-Cargando features macro...
-[2026-11-26 22:57:15 UTC]   Macro votes: regime=-1 sentiment=+0 trend=+0
-[2026-11-26 22:57:15 UTC]     SPY: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 0} setup_score=0
-[2026-11-26 22:57:15 UTC]     QQQ: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 0} setup_score=0
-[2026-11-26 22:57:15 UTC]     XLK: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 0} setup_score=0
-[2026-11-26 22:57:15 UTC]     XLF: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 0} setup_score=0
-[2026-11-26 22:57:15 UTC]     XLE: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 0} setup_score=0
-[2026-11-26 22:57:15 UTC]     XLV: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 0} setup_score=0
-[2026-11-26 22:57:15 UTC]     XLY: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 1, 'onchain': 0, 'setup': 0} setup_score=0
-[2026-11-26 22:57:16 UTC]     XLP: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 1, 'onchain': 0, 'setup': 1} setup_score=2
-[2026-11-26 22:57:16 UTC]     XLI: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': -1, 'onchain': 0, 'setup': 0} setup_score=0
-[2026-11-26 22:57:16 UTC]     XLU: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 1} setup_score=4
-[2026-11-26 22:57:16 UTC]     GLD: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': -1, 'onchain': 0, 'setup': 1} setup_score=2
-[2026-11-26 22:57:16 UTC]     USO: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 0} setup_score=0
-[2026-11-26 22:57:16 UTC]   Oportunidades: 0 (skip cooldown 0, no signal 12)
-[2026-11-26 22:57:16 UTC]   Sin oportunidades BUY
-[2026-11-26 22:57:16 UTC] Paso 5/5: Snapshot + reporte semanal
-[2026-11-26 22:57:16 UTC] Total portfolio value: $500.00 (cash $500.00, invertido $0.00)
-[2026-11-26 22:57:16 UTC]   Esta semana (desde 2026-11-23): +$0.00 (+0.00%)
-[2026-11-26 22:57:16 UTC]   >>> Semana POSITIVA
-[2026-11-26 22:57:16 UTC]   Historico semanal: 1 semanas cerradas, 0 positivas (0% win rate semanal)
-[2026-11-26 22:57:16 UTC]   v34 weekly size: 1.00x | dividends: $0.00
-[2026-11-26 22:57:16 UTC]   onchain: vote=+0 no_onchain_data
-[2026-11-26 22:57:16 UTC]   v38 monthly size: 1.00x
-[2026-11-26 22:57:16 UTC] Ciclo completado
+Traceback (most recent call last):
+  File "<frozen runpy>", line 189, in _run_module_as_main
+  File "<frozen runpy>", line 159, in _get_module_details
+  File "<frozen importlib._bootstrap_external>", line 1133, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1063, in source_to_code
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/home/runner/work/trading-bot/trading-bot/trading_bot/bot/main.py", line 151
+    if HAS_FINBERT:
+IndentationError: unexpected indent
