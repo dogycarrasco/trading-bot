@@ -134,6 +134,7 @@ jobs:
         if: always()
         uses: actions/upload-pages-artifact@v3
         with:
+          name: github-pages
           path: _site
 
       - name: Deploy Pages
