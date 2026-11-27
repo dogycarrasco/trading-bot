@@ -62,6 +62,43 @@ jobs:
               except: pass
           print('Datos OK')
           "
+
+                - name: Download onchain data (Blockchain.com)
+        continue-on-error: true
+        run: |
+          cd trading_bot
+          python -c "
+          import requests, pandas as pd, os
+          charts = {
+              'btc_hashrate': 'hash-rate',
+              'btc_active_addresses': 'n-unique-addresses',
+              'btc_difficulty': 'difficulty',
+              'btc_transactions': 'n-transactions',
+          }
+          os.makedirs('data/external', exist_ok=True)
+          for csv_name, chart in charts.items():
+              try:
+                  url = f'https://api.blockchain.info/charts/{chart}?timespan=1year&format=json&sampled=true'
+                  resp = requests.get(url, timeout=30)
+                  if resp.status_code == 200:
+                      data = resp.json()
+                      values = data.get('values', [])
+                      if values:
+                          df = pd.DataFrame(values)
+                          df['date'] = pd.to_datetime(df['x'], unit='s')
+                          df = df.set_index('date')[['y']]
+                          df.columns = ['value']
+                          df = df.sort_index()
+                          path = f'data/external/{csv_name}.csv'
+                          df.to_csv(path)
+                          print(f'{csv_name}: {len(df)} rows OK')
+                      else:
+                          print(f'{csv_name}: empty')
+                  else:
+                      print(f'{csv_name}: HTTP {resp.status_code}')
+              except Exception as e:
+                  print(f'{csv_name}: ERROR {e}')
+          "
           
       - name: Run bot
         continue-on-error: true
