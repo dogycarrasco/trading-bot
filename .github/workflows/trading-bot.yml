@@ -109,12 +109,12 @@ jobs:
           cd trading_bot
           python -m bot.main --once 2>&1 | tee ../live_run.log
 
-      - name: Fallback state
+            - name: Fallback state
         if: always()
         run: |
           mkdir -p trading_bot/results
           if [ ! -f trading_bot/results/live_state_v8.json ]; then
-            echo '{"cash":500.0,"positions":{},"history":[]}' > trading_bot/results/live_state_v8.json
+            echo "{\"cash\":500.0,\"positions\":{},\"history\":[]}" > trading_bot/results/live_state_v8.json
           fi
           cp live_run.log trading_bot/results/live_log_v8.txt 2>/dev/null || echo "Sin log" > trading_bot/results/live_log_v8.txt
 
@@ -123,4 +123,7 @@ jobs:
         run: |
           mkdir -p _site
           cp trading_bot/docs/dashboard.html _site/index.html 2>/dev/null || echo "<html><body>Dashboard no encontrado</body></html>" > _site/index.html
-          cp trading_bot/results/live_state_v8.json _site/live_state_v8.json 2>/dev/null || echo '{"cash":
+          cp trading_bot/results/live_state_v8.json _site/live_state_v8.json 2>/dev/null || echo "{\"cash\":500,\"positions\":{}}" > _site/live_state_v8.json
+          cp trading_bot/results/live_log_v8.txt _site/live_log_v8.txt 2>/dev/null || echo "Sin log" > _site/live_log_v8.txt8.txt
+
+      
