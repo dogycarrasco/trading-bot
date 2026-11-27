@@ -148,7 +148,6 @@ class TradingBotV15:
         self.last_month_check = None
         self.weekly_size_mult = 1.0
         self.finbert = None
-                self.finbert = None
         if HAS_FINBERT:
             try:
                 self.finbert = FinBERTSentiment()
