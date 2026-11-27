@@ -63,11 +63,21 @@ jobs:
           print('Datos OK')
           "
 
-                - name: Download onchain data (Blockchain.com)
+               - name: Download data
+        continue-on-error: true
+        run: |
+          ...comando original...
+
+      - name: Download onchain data (Blockchain.com)
         continue-on-error: true
         run: |
           cd trading_bot
           python -c "
+          ...
+          "
+
+      - name: Run bot
+        ...resto...
           import requests, pandas as pd, os
           charts = {
               'btc_hashrate': 'hash-rate',
