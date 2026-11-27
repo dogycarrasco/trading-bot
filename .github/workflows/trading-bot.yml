@@ -109,7 +109,7 @@ jobs:
           cd trading_bot
           python -m bot.main --once 2>&1 | tee ../live_run.log
 
-            - name: Fallback state
+      - name: Fallback state
         if: always()
         run: |
           mkdir -p trading_bot/results
@@ -124,6 +124,29 @@ jobs:
           mkdir -p _site
           cp trading_bot/docs/dashboard.html _site/index.html 2>/dev/null || echo "<html><body>Dashboard no encontrado</body></html>" > _site/index.html
           cp trading_bot/results/live_state_v8.json _site/live_state_v8.json 2>/dev/null || echo "{\"cash\":500,\"positions\":{}}" > _site/live_state_v8.json
-          cp trading_bot/results/live_log_v8.txt _site/live_log_v8.txt 2>/dev/null || echo "Sin log" > _site/live_log_v8.txt8.txt
+          cp trading_bot/results/live_log_v8.txt _site/live_log_v8.txt 2>/dev/null || echo "Sin log" > _site/live_log_v8.txt
 
-      
+      - name: Setup Pages
+        if: always()
+        uses: actions/configure-pages@v4
+
+      - name: Upload Pages artifact
+        if: always()
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy Pages
+        id: deployment
+        if: always()
+        uses: actions/deploy-pages@v4
+
+      - name: Commit state
+        if: always()
+        run: |
+          git config user.name "Trading Bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add trading_bot/results/live_state_v8.json trading_bot/results/live_log_v8.txt
+          git add trading_bot/results/trade_memory.json 2>/dev/null || true
+          git commit -m "Estado bot: $(date -u '+%Y-%m-%d %H:%M')" || echo "nada"
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:main || echo "push fail"
