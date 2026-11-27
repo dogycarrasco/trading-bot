@@ -17,3 +17,4 @@ sktime>=1.0
 mplfinance>=0.12
 statsmodels>=0.14
 hmmlearn>=0.3
+vaderSentiment>=3.3.2
