@@ -80,6 +80,22 @@ jobs:
           else:
               print(f'skip: OOS Calmar {calmar} <= 0.3')
           "
+      - name: Generate trade log (5y)
+        continue-on-error: true
+        run: |
+          cd trading_bot
+          python -m backtest.trade_log
+
+      - name: Upload trade analysis
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trade-analysis-5y
+          path: |
+            trading_bot/results/trade_log.csv
+            trading_bot/results/equity_curve.csv
+            trading_bot/results/backtest_config.json
+          
       - name: Create Pull Request
         if: steps.validate.outputs.improve == 'true'
         uses: peter-evans/create-pull-request@v6
