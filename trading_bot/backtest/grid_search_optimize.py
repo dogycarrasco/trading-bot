@@ -38,11 +38,22 @@ GRID = {
 }
 
 # walk-forward MENSUAL (no diario)
-TRAIN_BARS = 36   # 3 anos en meses
-TEST_BARS = 12    # 1 ano en meses
-HOLDOUT_FRAC = 0.15
+TRAIN_BARS = 24   # 2 anos en meses
+TEST_BARS = 6     # 6 meses en meses
+HOLDOUT_FRAC = 0.20
 MIN_OOS_CALMAR = 0.30
 
+
+
+def count_walk_forward_windows(n_bars, train_bars=TRAIN_BARS, test_bars=TEST_BARS, holdout_frac=HOLDOUT_FRAC):
+    """Numero de ventanas OOS del walk-forward (rolling por test_bars)."""
+    holdout_start = int(n_bars * (1 - holdout_frac))
+    n = 0
+    start = 0
+    while start + train_bars + test_bars <= holdout_start:
+        n += 1
+        start += test_bars
+    return n
 
 def load_all_data():
     """Carga cierres diarios del universo y convierte a mensual."""
@@ -147,11 +158,15 @@ def walk_forward_one_combo(params, mom_df, features, etf_scores, closes, rets):
         m = compute_window_metrics(weights_df, rets, test_idx)
         if m is not None:
             oos_results.append(m)
-        start = test_end
+        start += TEST_BARS
 
     if not oos_results:
         return {"calmar": 0, "cagr_pct": 0, "max_drawdown_pct": -100, "n_windows": 0,
                 "error": "no valid windows (weights index mismatch?)"}
+
+    if len(oos_results) < 3:
+        return {"calmar": 0, "cagr_pct": 0, "max_drawdown_pct": 0, "n_windows": len(oos_results),
+                "status": "insufficient_windows"}
 
     return {
         "cagr_pct": round(np.mean([r["cagr_pct"] for r in oos_results]), 2),
