@@ -316,15 +316,12 @@ def select_v8(mom_df, features, etf_scores, top_n_base=3,
             crypto_assets = weights_top.index.isin(CRYPTO_SYMBOLS)
             scale = max_crypto_weight / crypto_weight
             weights_top[crypto_assets] *= scale
-            non_crypto = ~crypto_assets
-            non_crypto_sum = weights_top[non_crypto].sum()
-            if non_crypto_sum > 0:
-                weights_top[non_crypto] *= (1.0 - max_crypto_weight) / non_crypto_sum
+            # remanente queda en cash (no redistribuir) para reducir drawdown
 
         for asset in weights_top.index:
             if weights_top[asset] > max_single_asset:
                 weights_top[asset] = max_single_asset
-        weights_top = weights_top / weights_top.sum()
+        # no renormalizar: el remanente queda en cash (caps duros)
 
         investable_pct = 1.0 - cash_pct
         weights_top = weights_top * investable_pct
