@@ -99,7 +99,22 @@ jobs:
               except Exception as e:
                   print(f'{csv_name}: ERROR {e}')
           "
+      - name: Generate trade log
+        continue-on-error: true
+        run: |
+          cd trading_bot
+          python -m backtest.trade_log
 
+      - name: Upload trade analysis
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trade-analysis
+          path: |
+            trading_bot/results/trade_log.csv
+            trading_bot/results/equity_curve.csv
+            trading_bot/results/backtest_config.json
+            
       - name: Run bot
         continue-on-error: true
         env:
