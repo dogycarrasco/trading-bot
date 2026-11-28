@@ -1,62 +1,62 @@
-[2026-11-28 01:31:24 UTC] Modo: PAPER TRADING SIMULADO (sin broker real)
-[2026-11-28 01:31:24 UTC] Capital inicial: $500.00
-[2026-11-28 01:31:24 UTC] Posiciones actuales: 0
-[2026-11-28 01:31:24 UTC] Estrategia: 5 capas votando (Regime+Sentiment+Onchain+Trend+Setup)
-[2026-11-28 01:31:24 UTC] Compra si >= 2 capas votan +1
-[2026-11-28 01:31:24 UTC] ============================================================
-[2026-11-28 01:31:24 UTC] Ciclo bot v35 ADAPTIVE
-[2026-11-28 01:31:24 UTC] ============================================================
-[2026-11-28 01:31:24 UTC] Paso 1/5: Actualizar precios de posiciones
-[2026-11-28 01:31:24 UTC] Paso 2/5: Verificar exits (triple barrier + trailing)
-[2026-11-28 01:31:24 UTC] Paso 3/5: Circuit breaker check
+[2026-11-28 01:39:09 UTC] Modo: PAPER TRADING SIMULADO (sin broker real)
+[2026-11-28 01:39:09 UTC] Capital inicial: $500.00
+[2026-11-28 01:39:09 UTC] Posiciones actuales: 0
+[2026-11-28 01:39:09 UTC] Estrategia: 5 capas votando (Regime+Sentiment+Onchain+Trend+Setup)
+[2026-11-28 01:39:09 UTC] Compra si >= 2 capas votan +1
+[2026-11-28 01:39:09 UTC] ============================================================
+[2026-11-28 01:39:09 UTC] Ciclo bot v35 ADAPTIVE
+[2026-11-28 01:39:09 UTC] ============================================================
+[2026-11-28 01:39:09 UTC] Paso 1/5: Actualizar precios de posiciones
+[2026-11-28 01:39:09 UTC] Paso 2/5: Verificar exits (triple barrier + trailing)
+[2026-11-28 01:39:09 UTC] Paso 3/5: Circuit breaker check
 
 Cargando features macro...
 Alpaca debug: key='PKAZ5...' secret='BZ8tH...'
 Alpaca keys OK: paper $100,000
 Alpaca SPY: 1 bars OK
-[2026-11-28 01:31:25 UTC] Paso 4/5: Escanear oportunidades (5 capas votando)
-[2026-11-28 01:31:26 UTC] finBERT: 20 headlines RSS cargados
+[2026-11-28 01:39:09 UTC] Paso 4/5: Escanear oportunidades (5 capas votando)
+[2026-11-28 01:39:11 UTC] finBERT: 20 headlines RSS cargados
 Alpaca SPY: 1 bars OK
-[2026-11-28 01:31:26 UTC]   Bear regime (score -25). Solo high-conviction.
+[2026-11-28 01:39:11 UTC]   Bear regime (score -25). Solo high-conviction.
 
 Cargando features macro...
 Alpaca SPY: 1 bars OK
 Alpaca SPY: 1 bars OK
 Alpaca XLK: 1 bars OK
 Alpaca XLF: 1 bars OK
-[2026-11-28 01:31:27 UTC]   Macro votes: regime=-1 sentiment=+0 trend=+0
+[2026-11-28 01:39:12 UTC]   Macro votes: regime=-1 sentiment=+0 trend=+0
 Alpaca SPY: 1 bars OK
-[2026-11-28 01:31:27 UTC]     SPY: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 0} setup_score=0
+[2026-11-28 01:39:12 UTC]     SPY: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 0} setup_score=0
 Alpaca QQQ: 1 bars OK
-[2026-11-28 01:31:28 UTC]     QQQ: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 0} setup_score=0
+[2026-11-28 01:39:12 UTC]     QQQ: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 0} setup_score=0
 Alpaca XLK: 1 bars OK
-[2026-11-28 01:31:28 UTC]     XLK: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 0} setup_score=0
+[2026-11-28 01:39:12 UTC]     XLK: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 0} setup_score=0
 Alpaca XLF: 1 bars OK
-[2026-11-28 01:31:28 UTC]     XLF: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 0} setup_score=0
+[2026-11-28 01:39:12 UTC]     XLF: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 0} setup_score=0
 Alpaca XLE: 1 bars OK
-[2026-11-28 01:31:28 UTC]     XLE: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 0} setup_score=0
+[2026-11-28 01:39:12 UTC]     XLE: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 0} setup_score=0
 Alpaca XLV: 1 bars OK
-[2026-11-28 01:31:29 UTC]     XLV: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 0} setup_score=0
+[2026-11-28 01:39:12 UTC]     XLV: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 0} setup_score=0
 Alpaca XLY: 1 bars OK
-[2026-11-28 01:31:29 UTC]     XLY: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 1, 'onchain': 0, 'setup': 0} setup_score=0
+[2026-11-28 01:39:13 UTC]     XLY: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 1, 'onchain': 0, 'setup': 0} setup_score=0
 Alpaca XLP: 1 bars OK
-[2026-11-28 01:31:29 UTC]     XLP: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 1, 'onchain': 0, 'setup': 1} setup_score=2
+[2026-11-28 01:39:13 UTC]     XLP: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 1, 'onchain': 0, 'setup': 1} setup_score=2
 Alpaca XLI: 1 bars OK
-[2026-11-28 01:31:29 UTC]     XLI: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': -1, 'onchain': 0, 'setup': 0} setup_score=0
+[2026-11-28 01:39:13 UTC]     XLI: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': -1, 'onchain': 0, 'setup': 0} setup_score=0
 Alpaca XLU: 1 bars OK
-[2026-11-28 01:31:29 UTC]     XLU: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 1} setup_score=4
+[2026-11-28 01:39:13 UTC]     XLU: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 1} setup_score=4
 Alpaca GLD: 1 bars OK
-[2026-11-28 01:31:30 UTC]     GLD: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': -1, 'onchain': 0, 'setup': 1} setup_score=2
+[2026-11-28 01:39:13 UTC]     GLD: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': -1, 'onchain': 0, 'setup': 1} setup_score=2
 Alpaca USO: 1 bars OK
-[2026-11-28 01:31:30 UTC]     USO: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 0} setup_score=0
-[2026-11-28 01:31:30 UTC]   Oportunidades: 0 (skip cooldown 0, no signal 12)
-[2026-11-28 01:31:30 UTC]   Sin oportunidades BUY
-[2026-11-28 01:31:30 UTC] Paso 5/5: Snapshot + reporte semanal
-[2026-11-28 01:31:30 UTC] Total portfolio value: $500.00 (cash $500.00, invertido $0.00)
-[2026-11-28 01:31:30 UTC]   Esta semana (desde 2026-11-23): +$0.00 (+0.00%)
-[2026-11-28 01:31:30 UTC]   >>> Semana POSITIVA
-[2026-11-28 01:31:30 UTC]   Historico semanal: 1 semanas cerradas, 0 positivas (0% win rate semanal)
-[2026-11-28 01:31:30 UTC]   v34 weekly size: 1.00x | dividends: $0.00
-[2026-11-28 01:31:30 UTC]   onchain: vote=+0 addr_up+hash_down
-[2026-11-28 01:31:30 UTC]   v38 monthly size: 1.00x
-[2026-11-28 01:31:30 UTC] Ciclo completado
+[2026-11-28 01:39:13 UTC]     USO: HOLD votes={'regime': -1, 'sentiment': 0, 'trend': 0, 'onchain': 0, 'setup': 0} setup_score=0
+[2026-11-28 01:39:13 UTC]   Oportunidades: 0 (skip cooldown 0, no signal 12)
+[2026-11-28 01:39:13 UTC]   Sin oportunidades BUY
+[2026-11-28 01:39:13 UTC] Paso 5/5: Snapshot + reporte semanal
+[2026-11-28 01:39:13 UTC] Total portfolio value: $500.00 (cash $500.00, invertido $0.00)
+[2026-11-28 01:39:13 UTC]   Esta semana (desde 2026-11-23): +$0.00 (+0.00%)
+[2026-11-28 01:39:13 UTC]   >>> Semana POSITIVA
+[2026-11-28 01:39:13 UTC]   Historico semanal: 1 semanas cerradas, 0 positivas (0% win rate semanal)
+[2026-11-28 01:39:13 UTC]   v34 weekly size: 1.00x | dividends: $0.00
+[2026-11-28 01:39:13 UTC]   onchain: vote=+0 addr_up+hash_down
+[2026-11-28 01:39:13 UTC]   v38 monthly size: 1.00x
+[2026-11-28 01:39:13 UTC] Ciclo completado
