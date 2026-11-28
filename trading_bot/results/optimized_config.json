@@ -1,13 +1,13 @@
 {
   "status": "improved",
-  "avg_oos_calmar": 3.43,
-  "avg_oos_cagr_pct": 17.27,
-  "avg_oos_max_dd_pct": -5.04,
-  "n_windows": 1,
+  "avg_oos_calmar": 13.008,
+  "avg_oos_cagr_pct": 17.8,
+  "avg_oos_max_dd_pct": -2.92,
+  "n_windows": 4,
   "params": {
     "top_n_base": 2,
     "max_crypto_weight": 0.2,
-    "max_single_asset": 0.3,
+    "max_single_asset": 0.5,
     "bubble_penalty": 0.3
   },
   "grid": {
@@ -32,5 +32,5 @@
       0.7
     ]
   },
-  "timestamp": "2026-11-26T01:10:21.390999+00:00"
+  "timestamp": "2026-11-28T03:21:16.069496+00:00"
 }
