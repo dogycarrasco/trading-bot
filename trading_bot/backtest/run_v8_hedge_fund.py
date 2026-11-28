@@ -318,13 +318,14 @@ def select_v8(mom_df, features, etf_scores, top_n_base=3,
             weights_top[crypto_assets] *= scale
             # remanente queda en cash (no redistribuir) para reducir drawdown
 
+        investable_pct = 1.0 - cash_pct
+        weights_top = weights_top * investable_pct
+
+        # caps duros: SIEMPRE al final, después de todas las transformaciones
         for asset in weights_top.index:
             if weights_top[asset] > max_single_asset:
                 weights_top[asset] = max_single_asset
-        # no renormalizar: el remanente queda en cash (caps duros)
-
-        investable_pct = 1.0 - cash_pct
-        weights_top = weights_top * investable_pct
+        # no renormalizar: el remanente queda en cash
 
         weights.loc[month, weights_top.index] = weights_top.values
         selections.append({
